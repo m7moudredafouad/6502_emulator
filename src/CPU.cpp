@@ -20,23 +20,11 @@ void CPU::dump() {
     cout << ", X: 0x" << int(X);
     cout << ", Y: 0x" << int(Y);
     cout << ", SP: 0x" << int(SP);
-    cout << ", SR(NVBDIZC): 0b" << int(SR.N) << int(SR.V) << int(SR.B)
+    cout << ", SR(NV_BDIZC): 0b" << int(SR.N) << int(SR.V) << 0 << int(SR.B)
          << int(SR.D) << int(SR.I) << int(SR.Z) << int(SR.C);
     cout << dec;
     cout << endl;
 }
-
-uint8_t CPU::mem_read(uint16_t address) {
-    m_cycles++;
-    return m_memory.read(address);
-}
-
-uint8_t CPU::mem_read(uint16_t address, uint8_t offset) {
-    m_cycles += 2;
-    return m_memory.read(address + offset);
-}
-
-uint8_t CPU::Fetch() { return this->mem_read(PC++); }
 
 void CPU::Execute() {
     while ((PC - 0x0200) < m_program_size) {
@@ -46,9 +34,9 @@ void CPU::Execute() {
         uint8_t op_code = this->Fetch();
         assert(isa_map.count(op_code) > 0);
 
-        isa_map[op_code].function(*this, op_code, isa_map[op_code].name);
+        isa_map[op_code](*this, op_code);
 
-        std::cout << isa_map[op_code].name << ":\t";
+        std::cout << ToString(static_cast<Instruction>(op_code)) << ":\t";
         std::cout << std::hex << "OpCode: 0x" << int(op_code) << std::dec;
         std::cout << ", Cycles: " << (m_cycles - old_cycles) << std::endl
                   << "\t\t";
