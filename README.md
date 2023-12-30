@@ -1,3 +1,11 @@
+## Build & Run
+```shell
+$ . build/setup.sh
+$ build
+$ run # run main program
+$ run_test # run test cases
+```
+
 ## Addressing Modes
 
 | Mode   |          Name         |     Code     |                                                   Description                                                      |
