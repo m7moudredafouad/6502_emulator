@@ -40,16 +40,21 @@ class CPU {
         return m_memory.read(address);
     }
 
+    void mem_write(uint16_t address, uint8_t data) {
+        m_cycles++;
+        return m_memory.write(address, data);
+    }
+
     template <typename address_t>
-    uint16_t get_address(address_t base_address, uint8_t offset) {
-        uint16_t address =
-            (base_address + offset) & static_cast<address_t>(0xFFFF);
+    uint16_t get_address(address_t base_address, uint8_t offset, bool force_cycle = false) {
+        uint16_t address = base_address + offset;
 
         // FIXME: Not sure why, but it's needed for ZPX
         if constexpr (std::is_same_v<address_t, uint8_t>) {
             m_cycles++;
+            address &= 0xFF;
         } else if constexpr (std::is_same_v<address_t, uint16_t>) {
-            if ((address >> 8) != (base_address >> 8)) {
+            if (force_cycle || ((address >> 8) != (base_address >> 8))) {
                 m_cycles++;
             }
         } else {

@@ -3,6 +3,7 @@
 #include <CPU.h>
 
 enum Instruction : uint8_t {
+    // ADC Add Memory to Accumulator with Carry
     ADC_IMM = 0x69,
     ADC_ZP = 0x65,
     ADC_ZPX = 0x75,
@@ -11,6 +12,23 @@ enum Instruction : uint8_t {
     ADC_ABSY = 0x79,
     ADC_INDX = 0x61,
     ADC_INDY = 0x71,
+
+    // AND AND Memory with Accumulator
+    AND_IMM = 0x29,
+    AND_ZP = 0x25,
+    AND_ZPX = 0x35,
+    AND_ABS = 0x2D,
+    AND_ABSX = 0x3D,
+    AND_ABSY = 0x39,
+    AND_INDX = 0x21,
+    AND_INDY = 0x31,
+
+    // ASL Shift Left One Bit (Memory or Accumulator)
+    ASL_ACC = 0x0A,
+    ASL_ZP = 0x06,
+    ASL_ZPX = 0x16,
+    ASL_ABS = 0x0E,
+    ASL_ABSX = 0x1E,
 
     LDA_IMM = 0xA9,
     LDA_ZP = 0xA5,

@@ -13,6 +13,8 @@ class Memory {
         }
     }
 
+    void write(uint16_t address, uint8_t data) { m_data[address] = data; }
+
     uint8_t read(uint16_t address) { return m_data[address]; }
 
   private:

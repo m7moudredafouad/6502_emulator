@@ -51,6 +51,86 @@ void INST_ADC(CPU& cpu, uint8_t op_code) {
     }
 }
 
+void INST_AND(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::AND_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::AND_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::AND_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::AND_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::AND_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    case Instruction::AND_ABSY: {
+        address = AbsoluteYAddress(cpu);
+    } break;
+    case Instruction::AND_INDX: {
+        address = IndexedIndirectAddress(cpu);
+    } break;
+    case Instruction::AND_INDY: {
+        address = IndirectIndexedAddress(cpu);
+    } break;
+    default:
+        ASSERT(0,
+               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+    }
+
+    cpu.AC &= cpu.mem_read(address);
+
+    cpu.SR.N = SIGN_BIT(cpu.AC);
+    cpu.SR.Z = cpu.AC == 0;
+}
+
+void INST_ASL(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::ASL_ACC:
+        break;
+    case Instruction::ASL_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::ASL_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::ASL_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::ASL_ABSX: {
+        address = AbsoluteXAddress(cpu, true);
+    } break;
+    default:
+        ASSERT(0,
+               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+    }
+
+    cpu.mem_read(0); // Just to add 1 Cycle
+    uint16_t val = 0;
+
+    if (op_code == Instruction::ASL_ACC) {
+        val = cpu.AC;
+        val <<= 1;
+        cpu.AC = val & 0xFF;
+    } else {
+        val = cpu.mem_read(address);
+        val <<= 1;
+        cpu.mem_write(address, val & 0xFF);
+    }
+
+    cpu.SR.N = SIGN_BIT(val);
+    cpu.SR.Z = val == 0;
+    cpu.SR.C = ((val >> 8) == 1);
+}
+
 void INST_LDA(CPU& cpu, uint8_t op_code) {
     uint16_t address;
 
@@ -154,6 +234,16 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
                 inst_map[Instruction::ADC_INDX] =
                     inst_map[Instruction::ADC_INDY] = INST_ADC;
 
+    inst_map[Instruction::AND_IMM] = inst_map[Instruction::AND_ZP] =
+        inst_map[Instruction::AND_ZPX] = inst_map[Instruction::AND_ABS] =
+            inst_map[Instruction::AND_ABSX] = inst_map[Instruction::AND_ABSY] =
+                inst_map[Instruction::AND_INDX] =
+                    inst_map[Instruction::AND_INDY] = INST_AND;
+
+    inst_map[Instruction::ASL_ACC] = inst_map[Instruction::ASL_ZP] =
+        inst_map[Instruction::ASL_ZPX] = inst_map[Instruction::ASL_ABS] =
+            inst_map[Instruction::ASL_ABSX] = INST_ASL;
+
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
         inst_map[Instruction::LDA_ZPX] = inst_map[Instruction::LDA_ABS] =
             inst_map[Instruction::LDA_ABSX] = inst_map[Instruction::LDA_ABSY] =
@@ -170,63 +260,56 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
 }
 
 std::string ToString(Instruction inst) {
+#define INSERT_INST(v)                                                         \
+    case v:                                                                    \
+        return #v
     switch (inst) {
-    case Instruction::ADC_IMM:
-        return "adc_immediate";
-    case Instruction::ADC_ZP:
-        return "adc_zeropage";
-    case Instruction::ADC_ZPX:
-        return "adc_zeropage_x";
-    case Instruction::ADC_ABS:
-        return "adc_absolute";
-    case Instruction::ADC_ABSX:
-        return "adc_absolute_x";
-    case Instruction::ADC_ABSY:
-        return "adc_absolute_y";
-    case Instruction::ADC_INDX:
-        return "adc_indirect_x";
-    case Instruction::ADC_INDY:
-        return "adc_indirect_y";
+        INSERT_INST(Instruction::ADC_IMM);
+        INSERT_INST(Instruction::ADC_ZP);
+        INSERT_INST(Instruction::ADC_ZPX);
+        INSERT_INST(Instruction::ADC_ABS);
+        INSERT_INST(Instruction::ADC_ABSX);
+        INSERT_INST(Instruction::ADC_ABSY);
+        INSERT_INST(Instruction::ADC_INDX);
+        INSERT_INST(Instruction::ADC_INDY);
 
-    case Instruction::LDA_IMM:
-        return "lda_immediate";
-    case Instruction::LDA_ZP:
-        return "lda_zeropage";
-    case Instruction::LDA_ZPX:
-        return "lda_zeropage_x";
-    case Instruction::LDA_ABS:
-        return "lda_absolute";
-    case Instruction::LDA_ABSX:
-        return "lda_absolute_x";
-    case Instruction::LDA_ABSY:
-        return "lda_absolute_y";
-    case Instruction::LDA_INDX:
-        return "lda_indirect_x";
-    case Instruction::LDA_INDY:
-        return "lda_indirect_y";
+        INSERT_INST(Instruction::AND_IMM);
+        INSERT_INST(Instruction::AND_ZP);
+        INSERT_INST(Instruction::AND_ZPX);
+        INSERT_INST(Instruction::AND_ABS);
+        INSERT_INST(Instruction::AND_ABSX);
+        INSERT_INST(Instruction::AND_ABSY);
+        INSERT_INST(Instruction::AND_INDX);
+        INSERT_INST(Instruction::AND_INDY);
 
-    case Instruction::LDX_IMM:
-        return "ldx_immediate";
-    case Instruction::LDX_ZP:
-        return "ldx_zeropage";
-    case Instruction::LDX_ZPY:
-        return "ldx_zeropage_y";
-    case Instruction::LDX_ABS:
-        return "ldx_absolute";
-    case Instruction::LDX_ABSY:
-        return "ldx_absolute_y";
+        INSERT_INST(Instruction::ASL_ACC);
+        INSERT_INST(Instruction::ASL_ZP);
+        INSERT_INST(Instruction::ASL_ZPX);
+        INSERT_INST(Instruction::ASL_ABS);
+        INSERT_INST(Instruction::ASL_ABSX);
 
-    case Instruction::LDY_IMM:
-        return "ldy_immediate";
-    case Instruction::LDY_ZP:
-        return "ldy_zeropage";
-    case Instruction::LDY_ZPX:
-        return "ldy_zeropage_x";
-    case Instruction::LDY_ABS:
-        return "ldy_absolute";
-    case Instruction::LDY_ABSX:
-        return "ldy_absolute_x";
+        INSERT_INST(Instruction::LDA_IMM);
+        INSERT_INST(Instruction::LDA_ZP);
+        INSERT_INST(Instruction::LDA_ZPX);
+        INSERT_INST(Instruction::LDA_ABS);
+        INSERT_INST(Instruction::LDA_ABSX);
+        INSERT_INST(Instruction::LDA_ABSY);
+        INSERT_INST(Instruction::LDA_INDX);
+        INSERT_INST(Instruction::LDA_INDY);
+
+        INSERT_INST(Instruction::LDX_IMM);
+        INSERT_INST(Instruction::LDX_ZP);
+        INSERT_INST(Instruction::LDX_ZPY);
+        INSERT_INST(Instruction::LDX_ABS);
+        INSERT_INST(Instruction::LDX_ABSY);
+
+        INSERT_INST(Instruction::LDY_IMM);
+        INSERT_INST(Instruction::LDY_ZP);
+        INSERT_INST(Instruction::LDY_ZPX);
+        INSERT_INST(Instruction::LDY_ABS);
+        INSERT_INST(Instruction::LDY_ABSX);
     }
+#undef INSERT_INST
 
     return "";
 }
