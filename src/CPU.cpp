@@ -26,6 +26,8 @@ void CPU::dump() {
     cout << endl;
 }
 
+uint8_t CPU::Fetch() { return this->mem_read(PC++); }
+
 void CPU::Execute() {
     while ((PC - 0x0200) < m_program_size) {
 

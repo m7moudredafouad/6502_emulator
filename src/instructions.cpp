@@ -3,88 +3,97 @@
 #include <iostream>
 
 void INST_LDA(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
     switch (op_code) {
     case Instruction::LDA_IMM: {
-        cpu.AC = cpu.Fetch();
+        address = cpu.PC++;
     } break;
     case Instruction::LDA_ZP: {
-        cpu.AC = ZeroPageAddress(cpu);
+        address = ZeroPageAddress(cpu);
     } break;
     case Instruction::LDA_ZPX: {
-        cpu.AC = ZeroPageXAddress(cpu);
+        address = ZeroPageXAddress(cpu);
     } break;
     case Instruction::LDA_ABS: {
-        cpu.AC = AbsoluteAddress(cpu);
+        address = AbsoluteAddress(cpu);
     } break;
     case Instruction::LDA_ABSX: {
-        cpu.AC = AbsoluteXAddress(cpu);
+        address = AbsoluteXAddress(cpu);
     } break;
     case Instruction::LDA_ABSY: {
-        cpu.AC = AbsoluteYAddress(cpu);
+        address = AbsoluteYAddress(cpu);
     } break;
     case Instruction::LDA_INDX: {
-        cpu.AC = IndexedIndirectAddress(cpu);
+        address = IndexedIndirectAddress(cpu);
     } break;
     case Instruction::LDA_INDY: {
-        cpu.AC = IndirectIndexedAddress(cpu);
+        address = IndirectIndexedAddress(cpu);
     } break;
     default:
         ASSERT(0,
                "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
     }
 
+    cpu.AC = cpu.mem_read(address);
     cpu.SR.N = ((cpu.AC & 0x80) > 0);
     cpu.SR.Z = cpu.AC == 0;
 }
 
 void INST_LDX(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
     switch (op_code) {
     case Instruction::LDX_IMM: {
-        cpu.X = cpu.Fetch();
+        address = cpu.PC++;
     } break;
     case Instruction::LDX_ZP: {
-        cpu.X = ZeroPageAddress(cpu);
+        address = ZeroPageAddress(cpu);
     } break;
     case Instruction::LDX_ZPY: {
-        cpu.X = ZeroPageYAddress(cpu);
+        address = ZeroPageYAddress(cpu);
     } break;
     case Instruction::LDX_ABS: {
-        cpu.X = AbsoluteAddress(cpu);
+        address = AbsoluteAddress(cpu);
     } break;
     case Instruction::LDX_ABSY: {
-        cpu.X = AbsoluteYAddress(cpu);
+        address = AbsoluteYAddress(cpu);
     } break;
     default:
         ASSERT(0,
                "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
     }
 
+    cpu.X = cpu.mem_read(address);
     cpu.SR.N = ((cpu.X & 0x80) > 0);
     cpu.SR.Z = cpu.X == 0;
 }
 
 void INST_LDY(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
     switch (op_code) {
     case Instruction::LDY_IMM: {
-        cpu.Y = cpu.Fetch();
+        address = cpu.PC++;
     } break;
     case Instruction::LDY_ZP: {
-        cpu.Y = ZeroPageAddress(cpu);
+        address = ZeroPageAddress(cpu);
     } break;
     case Instruction::LDY_ZPX: {
-        cpu.Y = ZeroPageXAddress(cpu);
+        address = ZeroPageXAddress(cpu);
     } break;
     case Instruction::LDY_ABS: {
-        cpu.Y = AbsoluteAddress(cpu);
+        address = AbsoluteAddress(cpu);
     } break;
     case Instruction::LDY_ABSX: {
-        cpu.Y = AbsoluteXAddress(cpu);
+        address = AbsoluteXAddress(cpu);
     } break;
     default:
         ASSERT(0,
                "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
     }
 
+    cpu.Y = cpu.mem_read(address);
     cpu.SR.N = ((cpu.Y & 0x80) > 0);
     cpu.SR.Z = cpu.Y == 0;
 }

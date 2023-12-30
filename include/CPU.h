@@ -35,18 +35,13 @@ class CPU {
   public:
     CPU(uint8_t* program, uint16_t size);
 
-    template <typename T = uint8_t> T mem_read(uint16_t address) {
-        T value = 0;
-        for (size_t i = 0; i < sizeof(T); i++) {
-            m_cycles++;
-            value = (value << 8);
-            value |= m_memory.read(address++);
-        }
-        return value;
+    uint8_t mem_read(uint16_t address) {
+        m_cycles++;
+        return m_memory.read(address);
     }
 
-    template <typename address_t, typename T = uint8_t>
-    T mem_read(address_t base_address, uint8_t offset) {
+    template <typename address_t>
+    uint16_t get_address(address_t base_address, uint8_t offset) {
         uint16_t address =
             (base_address + offset) & static_cast<address_t>(0xFFFF);
 
@@ -58,10 +53,10 @@ class CPU {
                 m_cycles++;
             }
         } else {
-            ASSERT(0, "mem_read address_t not compatible");
+            ASSERT(0, "get_address address_t not compatible");
         }
 
-        return this->mem_read<T>(address);
+        return address;
     }
 
   public:
@@ -80,12 +75,7 @@ class CPU {
     }
 
   public:
-    template <typename T = uint8_t> T Fetch() {
-        T value = this->mem_read<T>(PC);
-        PC += sizeof(T);
-        return value;
-    }
-
+    uint8_t Fetch();
     void Execute();
 
   private:
