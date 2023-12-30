@@ -3,6 +3,15 @@
 #include <CPU.h>
 
 enum Instruction : uint8_t {
+    ADC_IMM = 0x69,
+    ADC_ZP = 0x65,
+    ADC_ZPX = 0x75,
+    ADC_ABS = 0x6D,
+    ADC_ABSX = 0x7D,
+    ADC_ABSY = 0x79,
+    ADC_INDX = 0x61,
+    ADC_INDY = 0x71,
+
     LDA_IMM = 0xA9,
     LDA_ZP = 0xA5,
     LDA_ZPX = 0xB5,

@@ -6,6 +6,8 @@ static uint16_t address_from_bytes(uint8_t low, uint8_t high) {
     return address | low;
 }
 
+uint16_t ImmediateAddress(CPU& cpu) { return cpu.PC++; }
+
 uint16_t ZeroPageAddress(CPU& cpu) { return cpu.Fetch(); }
 
 uint16_t ZeroPageXAddress(CPU& cpu) {
