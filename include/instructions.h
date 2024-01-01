@@ -30,6 +30,40 @@ enum Instruction : uint8_t {
     ASL_ABS = 0x0E,
     ASL_ABSX = 0x1E,
 
+    // BCC Branch on Carry Clear
+    BCC = 0x90,
+
+    // BCS Branch on Carry Set
+    BCS = 0xB0,
+
+    // BEQ Branch on Result Zero
+    BEQ = 0xF0,
+
+    // BIT Test Bits in Memory with Accumulator
+    BIT_ZP = 0x24,
+    BIT_ABS = 0x2C,
+
+    // BMI Branch on Result Minus
+    BMI = 0x30,
+
+    // BNE Branch on Result not Zero
+    BNE = 0xD0,
+
+    // BPL Branch on Result Plus
+    BPL = 0x10,
+
+    // BRK Force Break
+    BRK = 0x00,
+
+    // BVC Branch on Overflow Clear
+    BVC = 0x50,
+
+    // BVS Branch on Overflow Set
+    BVS = 0x70,
+
+    // NOP No Operation
+    NOP = 0xEA,
+
     LDA_IMM = 0xA9,
     LDA_ZP = 0xA5,
     LDA_ZPX = 0xB5,

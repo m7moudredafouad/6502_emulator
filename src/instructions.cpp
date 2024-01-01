@@ -131,6 +131,56 @@ void INST_ASL(CPU& cpu, uint8_t op_code) {
     cpu.SR.C = ((val >> 8) == 1);
 }
 
+void INST_BRANCH(CPU& cpu, uint8_t op_code) {
+    uint8_t offset = cpu.Fetch();
+    bool condition = false;
+    switch (op_code) {
+    case Instruction::BCC: {
+        condition = (cpu.SR.C == 0);
+    } break;
+    case Instruction::BCS: {
+        condition = (cpu.SR.C == 1);
+    } break;
+    case Instruction::BEQ: {
+        condition = (cpu.SR.Z == 1);
+    } break;
+    case Instruction::BNE: {
+        condition = (cpu.SR.Z == 0);
+    } break;
+    case Instruction::BMI: {
+        condition = (cpu.SR.N == 1);
+    } break;
+    case Instruction::BPL: {
+        condition = (cpu.SR.N == 0);
+    } break;
+    case Instruction::BVC: {
+        condition = (cpu.SR.V == 0);
+    } break;
+    case Instruction::BVS: {
+        condition = (cpu.SR.V == 1);
+    } break;
+    default:
+        ASSERT(0,
+               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+    }
+
+    if (condition) {
+        cpu.mem_read(0); // Just to add 1 Cycle
+        cpu.PC = cpu.get_address(cpu.PC, offset);
+    }
+}
+
+void INST_NOP(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::NOP: {
+        cpu.mem_read(0); // Just to add 1 Cycle
+    } break;
+    default:
+        ASSERT(0,
+               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+    }
+}
+
 void INST_LDA(CPU& cpu, uint8_t op_code) {
     uint16_t address;
 
@@ -244,6 +294,14 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
         inst_map[Instruction::ASL_ZPX] = inst_map[Instruction::ASL_ABS] =
             inst_map[Instruction::ASL_ABSX] = INST_ASL;
 
+    inst_map[Instruction::BCC] = inst_map[Instruction::BCS] =
+        inst_map[Instruction::BEQ] = inst_map[Instruction::BMI] =
+            inst_map[Instruction::BNE] = inst_map[Instruction::BPL] =
+                inst_map[Instruction::BVC] = inst_map[Instruction::BVS] =
+                    INST_BRANCH;
+
+    inst_map[Instruction::NOP] = INST_NOP;
+
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
         inst_map[Instruction::LDA_ZPX] = inst_map[Instruction::LDA_ABS] =
             inst_map[Instruction::LDA_ABSX] = inst_map[Instruction::LDA_ABSY] =
@@ -287,6 +345,19 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::ASL_ZPX);
         INSERT_INST(Instruction::ASL_ABS);
         INSERT_INST(Instruction::ASL_ABSX);
+
+        INSERT_INST(Instruction::BCC);
+        INSERT_INST(Instruction::BCS);
+        INSERT_INST(Instruction::BEQ);
+        INSERT_INST(Instruction::BIT_ZP);
+        INSERT_INST(Instruction::BIT_ABS);
+        INSERT_INST(Instruction::BMI);
+        INSERT_INST(Instruction::BNE);
+        INSERT_INST(Instruction::BPL);
+        INSERT_INST(Instruction::BVC);
+        INSERT_INST(Instruction::BVS);
+
+        INSERT_INST(Instruction::NOP);
 
         INSERT_INST(Instruction::LDA_IMM);
         INSERT_INST(Instruction::LDA_ZP);
