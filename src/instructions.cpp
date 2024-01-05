@@ -2,7 +2,11 @@
 #include <instructions.h>
 #include <iostream>
 
-#define SIGN_BIT(value) (((value)&0x80) > 0)
+#define GET_BIT(value, bit) (((value) >> (bit)) & 0x1)
+#define SIGN_BIT(value) GET_BIT((value), 7)
+
+#define ISTRUCTION_UNREACHABLE(op)                                             \
+    ASSERT(0, "Unknown op_code: 0x" << std::hex << int(op) << std::dec)
 
 void INST_ADC(CPU& cpu, uint8_t op_code) {
     uint16_t address;
@@ -80,8 +84,7 @@ void INST_AND(CPU& cpu, uint8_t op_code) {
         address = IndirectIndexedAddress(cpu);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     cpu.AC &= cpu.mem_read(address);
@@ -109,8 +112,7 @@ void INST_ASL(CPU& cpu, uint8_t op_code) {
         address = AbsoluteXAddress(cpu, true);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     cpu.mem_read(0); // Just to add 1 Cycle
@@ -160,8 +162,7 @@ void INST_BRANCH(CPU& cpu, uint8_t op_code) {
         condition = (cpu.SR.V == 1);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     if (condition) {
@@ -170,14 +171,56 @@ void INST_BRANCH(CPU& cpu, uint8_t op_code) {
     }
 }
 
+void INST_BIT(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::BIT_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::BIT_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    uint8_t operand = cpu.mem_read(address);
+    cpu.SR.Z = ((cpu.AC & operand) == 0);
+    cpu.SR.N = GET_BIT(operand, 7);
+    cpu.SR.V = GET_BIT(operand, 6);
+}
+
+void INST_STATUS(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::CLC: {
+        cpu.SR.C = 0;
+    } break;
+    case Instruction::CLD: {
+        cpu.SR.D = 0;
+    } break;
+    case Instruction::CLI: {
+        cpu.SR.I = 0;
+    } break;
+    case Instruction::CLV: {
+        cpu.SR.V = 0;
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    cpu.mem_read(0);
+}
+
 void INST_NOP(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::NOP: {
         cpu.mem_read(0); // Just to add 1 Cycle
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 }
 
@@ -210,8 +253,7 @@ void INST_LDA(CPU& cpu, uint8_t op_code) {
         address = IndirectIndexedAddress(cpu);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     cpu.AC = cpu.mem_read(address);
@@ -239,8 +281,7 @@ void INST_LDX(CPU& cpu, uint8_t op_code) {
         address = AbsoluteYAddress(cpu);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     cpu.X = cpu.mem_read(address);
@@ -268,8 +309,7 @@ void INST_LDY(CPU& cpu, uint8_t op_code) {
         address = AbsoluteXAddress(cpu);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     cpu.Y = cpu.mem_read(address);
@@ -299,6 +339,11 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
             inst_map[Instruction::BNE] = inst_map[Instruction::BPL] =
                 inst_map[Instruction::BVC] = inst_map[Instruction::BVS] =
                     INST_BRANCH;
+
+    inst_map[Instruction::BIT_ZP] = inst_map[Instruction::BIT_ABS] = INST_BIT;
+
+    inst_map[Instruction::CLC] = inst_map[Instruction::CLD] =
+        inst_map[Instruction::CLI] = inst_map[Instruction::CLV] = INST_STATUS;
 
     inst_map[Instruction::NOP] = INST_NOP;
 
@@ -356,6 +401,11 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::BPL);
         INSERT_INST(Instruction::BVC);
         INSERT_INST(Instruction::BVS);
+
+        INSERT_INST(Instruction::CLC);
+        INSERT_INST(Instruction::CLD);
+        INSERT_INST(Instruction::CLI);
+        INSERT_INST(Instruction::CLV);
 
         INSERT_INST(Instruction::NOP);
 

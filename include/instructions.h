@@ -61,6 +61,12 @@ enum Instruction : uint8_t {
     // BVS Branch on Overflow Set
     BVS = 0x70,
 
+    // Clear Status
+    CLC = 0x18,
+    CLD = 0xD8,
+    CLI = 0x58,
+    CLV = 0xB8,
+
     // NOP No Operation
     NOP = 0xEA,
 
