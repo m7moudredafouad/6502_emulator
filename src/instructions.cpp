@@ -477,6 +477,20 @@ void INST_JMP(CPU& cpu, uint8_t op_code) {
     }
 }
 
+void INST_JSR(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::JSR: {
+        auto new_add = AbsoluteAddress(cpu);
+        auto [low, high] = bytes_from_address(cpu.PC - 1);
+        cpu.PUSH(low);
+        cpu.PUSH(high);
+        ADD_CYCLE(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
 void INST_LDA(CPU& cpu, uint8_t op_code) {
     uint16_t address;
 
@@ -662,10 +676,10 @@ void INST_PUSH(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::PHA: {
-        cpu.mem_write(cpu.SP++, cpu.AC);
+        cpu.PUSH(cpu.AC);
     } break;
     case Instruction::PHP: {
-        cpu.mem_write(cpu.SP++, cpu.SR.Value());
+        cpu.PUSH(cpu.SR.Value());
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -676,10 +690,10 @@ void INST_PULL(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::PLA: {
-        cpu.AC = cpu.mem_read(cpu.SP--);
+        cpu.AC = cpu.POP();
     } break;
     case Instruction::PLP: {
-        uint8_t val = cpu.mem_read(cpu.SP--);
+        uint8_t val = cpu.POP();
         cpu.SR.N = GET_BIT(val, 7);
         cpu.SR.V = GET_BIT(val, 6);
         cpu.SR.B = GET_BIT(val, 4);
@@ -773,6 +787,21 @@ void INST_ROR(CPU& cpu, uint8_t op_code) {
 
     cpu.SR.N = SIGN_BIT(val);
     cpu.SR.Z = cpu.AC == 0;
+}
+
+void INST_RTS(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::RTS: {
+        auto low = cpu.POP();
+        auto high = cpu.POP();
+        cpu.PC = address_from_bytes(low, high);
+        ADD_CYCLE(cpu);
+        ADD_CYCLE(cpu);
+        ADD_CYCLE(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
 }
 
 void INST_SBC(CPU& cpu, uint8_t op_code) {
@@ -991,6 +1020,8 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
 
     inst_map[Instruction::JMP_ABS] = inst_map[Instruction::JMP_IND] = INST_JMP;
 
+    inst_map[Instruction::JSR] = INST_JSR;
+
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
         inst_map[Instruction::LDA_ZPX] = inst_map[Instruction::LDA_ABS] =
             inst_map[Instruction::LDA_ABSX] = inst_map[Instruction::LDA_ABSY] =
@@ -1027,6 +1058,8 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::ROR_ACC] = inst_map[Instruction::ROR_ZP] =
         inst_map[Instruction::ROR_ZPX] = inst_map[Instruction::ROR_ABS] =
             inst_map[Instruction::ROR_ABSX] = INST_ROR;
+
+    inst_map[Instruction::RTS] = INST_RTS;
 
     inst_map[Instruction::SBC_IMM] = inst_map[Instruction::SBC_ZP] =
         inst_map[Instruction::SBC_ZPX] = inst_map[Instruction::SBC_ABS] =
@@ -1141,6 +1174,8 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::JMP_ABS);
         INSERT_INST(Instruction::JMP_IND);
 
+        INSERT_INST(Instruction::JSR);
+
         INSERT_INST(Instruction::LDA_IMM);
         INSERT_INST(Instruction::LDA_ZP);
         INSERT_INST(Instruction::LDA_ZPX);
@@ -1196,6 +1231,8 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::ROR_ZPX);
         INSERT_INST(Instruction::ROR_ABS);
         INSERT_INST(Instruction::ROR_ABSX);
+
+        INSERT_INST(Instruction::RTS);
 
         INSERT_INST(Instruction::SBC_IMM);
         INSERT_INST(Instruction::SBC_ZP);

@@ -26,6 +26,16 @@ void CPU::dump() {
     cout << endl;
 }
 
+void CPU::PUSH(uint8_t val) {
+    // Pushing bytes to the stack causes the stack pointer to be decremented.
+    mem_write(SP--, val);
+}
+
+uint8_t CPU::POP() {
+    // pulling bytes causes it to be incremented.
+    return mem_read(SP++);
+}
+
 uint8_t CPU::Fetch() { return this->mem_read(PC++); }
 
 void CPU::Execute() {

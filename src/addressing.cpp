@@ -1,10 +1,5 @@
 #include <addressing.h>
-
-static uint16_t address_from_bytes(uint8_t low, uint8_t high) {
-    uint16_t address = high;
-    address = address << 8;
-    return address | low;
-}
+#include <utils.h>
 
 uint16_t ImmediateAddress(CPU& cpu) { return cpu.PC++; }
 

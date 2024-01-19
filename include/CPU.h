@@ -83,6 +83,8 @@ class CPU {
     }
 
   public:
+    void PUSH(uint8_t);
+    uint8_t POP();
     uint8_t Fetch();
     void Execute();
 

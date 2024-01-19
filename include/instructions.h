@@ -126,7 +126,7 @@ enum Instruction : uint8_t {
     JMP_IND = 0x6C,
 
     // JSR Jump to New Location Saving Return Address
-    // JSR = 0x20,
+    JSR = 0x20,
 
     // LDA Load Accumulator with Memory
     LDA_IMM = 0xA9,
@@ -202,7 +202,7 @@ enum Instruction : uint8_t {
     // RTI = 0x40,
 
     // RTS Return from Subroutine
-    // RTS = 0x60,
+    RTS = 0x60,
     
     // SBC Subtract Memory from Accumulator with Borrow
     SBC_IMM = 0xE9,
