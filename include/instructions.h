@@ -67,6 +67,27 @@ enum Instruction : uint8_t {
     CLI = 0x58,
     CLV = 0xB8,
 
+    // CMP Compare Memory with Accumulator
+    CMP_IMM = 0xC9,
+    CMP_ZP = 0xC5,
+    CMP_ZPX = 0xD5,
+    CMP_ABS = 0xCD,
+    CMP_ABSX = 0xDD,
+    CMP_ABSY = 0xD9,
+    CMP_INDX = 0xC1,
+    CMP_INDY = 0xD1,
+
+    // CMX Compare Memory and Index X
+    CMX_IMM = 0xE0,
+    CMX_ZP = 0xE4,
+    CMX_ABS = 0xEC,
+
+    // CMY Compare Memory and Index Y
+    CMY_IMM = 0xC0,
+    CMY_ZP = 0xC4,
+    CMY_ABS = 0xCC,
+
+
     // NOP No Operation
     NOP = 0xEA,
 

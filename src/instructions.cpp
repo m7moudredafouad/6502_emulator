@@ -37,8 +37,7 @@ void INST_ADC(CPU& cpu, uint8_t op_code) {
         address = IndirectIndexedAddress(cpu);
     } break;
     default:
-        ASSERT(0,
-               "Unknown op_code: 0x" << std::hex << int(op_code) << std::dec);
+        ISTRUCTION_UNREACHABLE(op_code);
     }
 
     uint8_t operand = cpu.mem_read(address);
@@ -48,7 +47,7 @@ void INST_ADC(CPU& cpu, uint8_t op_code) {
 
     cpu.SR.N = SIGN_BIT(cpu.AC);
     cpu.SR.Z = cpu.AC == 0;
-    cpu.SR.C = ((val >> 8) == 1);
+    cpu.SR.C = GET_BIT(val, 8);
     cpu.SR.V = 0;
     if ((SIGN_BIT(ac) == SIGN_BIT(operand))) {
         cpu.SR.V = (SIGN_BIT(ac) != SIGN_BIT(cpu.AC));
@@ -130,7 +129,7 @@ void INST_ASL(CPU& cpu, uint8_t op_code) {
 
     cpu.SR.N = SIGN_BIT(val);
     cpu.SR.Z = val == 0;
-    cpu.SR.C = ((val >> 8) == 1);
+    cpu.SR.C = GET_BIT(val, 8);
 }
 
 void INST_BRANCH(CPU& cpu, uint8_t op_code) {
@@ -192,8 +191,6 @@ void INST_BIT(CPU& cpu, uint8_t op_code) {
 }
 
 void INST_STATUS(CPU& cpu, uint8_t op_code) {
-    uint16_t address;
-
     switch (op_code) {
     case Instruction::CLC: {
         cpu.SR.C = 0;
@@ -212,6 +209,96 @@ void INST_STATUS(CPU& cpu, uint8_t op_code) {
     }
 
     cpu.mem_read(0);
+}
+
+void INST_CMP(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::CMP_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::CMP_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::CMP_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::CMP_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::CMP_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    case Instruction::CMP_ABSY: {
+        address = AbsoluteYAddress(cpu);
+    } break;
+    case Instruction::CMP_INDX: {
+        address = IndexedIndirectAddress(cpu);
+    } break;
+    case Instruction::CMP_INDY: {
+        address = IndirectIndexedAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    auto value = cpu.mem_read(address);
+    uint8_t result = cpu.AC - value;
+
+    cpu.SR.N = SIGN_BIT(result);
+    cpu.SR.Z = (result == 0);
+    cpu.SR.C = (value >= cpu.AC);
+}
+
+void INST_CMX(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::CMX_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::CMX_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::CMX_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    auto value = cpu.mem_read(address);
+    uint8_t result = cpu.X - value;
+
+    cpu.SR.N = SIGN_BIT(result);
+    cpu.SR.Z = (result == 0);
+    cpu.SR.C = (value >= cpu.X);
+}
+
+void INST_CMY(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::CMY_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::CMY_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::CMY_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    auto value = cpu.mem_read(address);
+    uint8_t result = cpu.Y - value;
+
+    cpu.SR.N = SIGN_BIT(result);
+    cpu.SR.Z = (result == 0);
+    cpu.SR.C = (value >= cpu.Y);
 }
 
 void INST_NOP(CPU& cpu, uint8_t op_code) {
@@ -345,6 +432,18 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::CLC] = inst_map[Instruction::CLD] =
         inst_map[Instruction::CLI] = inst_map[Instruction::CLV] = INST_STATUS;
 
+    inst_map[Instruction::CMP_IMM] = inst_map[Instruction::CMP_ZP] =
+        inst_map[Instruction::CMP_ZPX] = inst_map[Instruction::CMP_ABS] =
+            inst_map[Instruction::CMP_ABSX] = inst_map[Instruction::CMP_ABSY] =
+                inst_map[Instruction::CMP_INDX] =
+                    inst_map[Instruction::CMP_INDY] = INST_CMP;
+
+    inst_map[Instruction::CMX_IMM] = inst_map[Instruction::CMX_ZP] =
+        inst_map[Instruction::CMX_ABS] = INST_CMX;
+
+    inst_map[Instruction::CMY_IMM] = inst_map[Instruction::CMY_ZP] =
+        inst_map[Instruction::CMY_ABS] = INST_CMY;
+
     inst_map[Instruction::NOP] = INST_NOP;
 
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
@@ -406,6 +505,23 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::CLD);
         INSERT_INST(Instruction::CLI);
         INSERT_INST(Instruction::CLV);
+
+        INSERT_INST(Instruction::CMP_IMM);
+        INSERT_INST(Instruction::CMP_ZP);
+        INSERT_INST(Instruction::CMP_ZPX);
+        INSERT_INST(Instruction::CMP_ABS);
+        INSERT_INST(Instruction::CMP_ABSX);
+        INSERT_INST(Instruction::CMP_ABSY);
+        INSERT_INST(Instruction::CMP_INDX);
+        INSERT_INST(Instruction::CMP_INDY);
+
+        INSERT_INST(Instruction::CMX_IMM);
+        INSERT_INST(Instruction::CMX_ZP);
+        INSERT_INST(Instruction::CMX_ABS);
+
+        INSERT_INST(Instruction::CMY_IMM);
+        INSERT_INST(Instruction::CMY_ZP);
+        INSERT_INST(Instruction::CMY_ABS);
 
         INSERT_INST(Instruction::NOP);
 
