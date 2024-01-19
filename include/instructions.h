@@ -185,11 +185,18 @@ enum Instruction : uint8_t {
     PLP = 0x28,
 
     // ROL Rotate One Bit Left (Memory or Accumulator)
-    // ROL_ACC = 0x6A,
-    // ROL_ZP = 0x66,
-    // ROL_ZPX = 0x76,
-    // ROL_ABS = 0x6E,
-    // ROL_ABSX = 0x7E,
+    ROL_ACC = 0x2A,
+    ROL_ZP = 0x26,
+    ROL_ZPX = 0x36,
+    ROL_ABS = 0x2E,
+    ROL_ABSX = 0x3E,
+
+    // ROR Rotate One Bit Right (Memory or Accumulator)
+    ROR_ACC = 0x6A,
+    ROR_ZP = 0x66,
+    ROR_ZPX = 0x76,
+    ROR_ABS = 0x6E,
+    ROR_ABSX = 0x7E,
 
     // RTI Return from Interrupt
     // RTI = 0x40,

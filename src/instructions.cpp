@@ -652,8 +652,9 @@ void INST_ORA(CPU& cpu, uint8_t op_code) {
 void INST_PUSH(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
-    case Instruction:
-    LPHA : { cpu.mem_write(cpu.SP++, cpu.AC); } break;
+    case Instruction::PHA: {
+        cpu.mem_write(cpu.SP++, cpu.AC);
+    } break;
     case Instruction::PHP: {
         cpu.mem_write(cpu.SP++, cpu.SR.Value());
     } break;
@@ -681,6 +682,88 @@ void INST_PULL(CPU& cpu, uint8_t op_code) {
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
+}
+
+void INST_ROL(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::ROL_ACC:
+        break;
+    case Instruction::ROL_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::ROL_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::ROL_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::ROL_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    ADD_CYCLE(cpu);
+    uint16_t val = 0;
+
+    if (op_code == Instruction::ROL_ACC) {
+        val = cpu.AC;
+        cpu.SR.C = GET_BIT(val, 7);
+        val <<= 1;
+        cpu.AC = val & 0xFF | cpu.SR.C;
+    } else {
+        val = cpu.mem_read(address);
+        cpu.SR.C = GET_BIT(val, 7);
+        val <<= 1;
+        cpu.mem_write(address, val & 0xFF | cpu.SR.C);
+    }
+
+    cpu.SR.N = SIGN_BIT(val);
+    cpu.SR.Z = cpu.AC == 0;
+}
+
+void INST_ROR(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::ROR_ACC:
+        break;
+    case Instruction::ROR_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::ROR_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::ROR_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::ROR_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    ADD_CYCLE(cpu);
+    uint16_t val = 0;
+
+    if (op_code == Instruction::ROL_ACC) {
+        val = cpu.AC;
+        cpu.SR.C = GET_BIT(val, 0);
+        val >>= 1;
+        cpu.AC = val & 0xFF | (cpu.SR.C << 7);
+    } else {
+        val = cpu.mem_read(address);
+        cpu.SR.C = GET_BIT(val, 0);
+        val >>= 1;
+        cpu.mem_write(address, val & 0xFF | (cpu.SR.C << 7));
+    }
+
+    cpu.SR.N = SIGN_BIT(val);
+    cpu.SR.Z = cpu.AC == 0;
 }
 
 void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
@@ -773,6 +856,14 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
 
     inst_map[Instruction::PHA] = inst_map[Instruction::PHP] = INST_PUSH;
     inst_map[Instruction::PLA] = inst_map[Instruction::PLP] = INST_PULL;
+
+    inst_map[Instruction::ROL_ACC] = inst_map[Instruction::ROL_ZP] =
+        inst_map[Instruction::ROL_ZPX] = inst_map[Instruction::ROL_ABS] =
+            inst_map[Instruction::ROL_ABSX] = INST_ROL;
+
+    inst_map[Instruction::ROR_ACC] = inst_map[Instruction::ROR_ZP] =
+        inst_map[Instruction::ROR_ZPX] = inst_map[Instruction::ROR_ABS] =
+            inst_map[Instruction::ROR_ABSX] = INST_ROR;
 }
 
 std::string ToString(Instruction inst) {
@@ -906,6 +997,18 @@ std::string ToString(Instruction inst) {
 
         INSERT_INST(Instruction::PLA);
         INSERT_INST(Instruction::PLP);
+
+        INSERT_INST(Instruction::ROL_ACC);
+        INSERT_INST(Instruction::ROL_ZP);
+        INSERT_INST(Instruction::ROL_ZPX);
+        INSERT_INST(Instruction::ROL_ABS);
+        INSERT_INST(Instruction::ROL_ABSX);
+
+        INSERT_INST(Instruction::ROR_ACC);
+        INSERT_INST(Instruction::ROR_ZP);
+        INSERT_INST(Instruction::ROR_ZPX);
+        INSERT_INST(Instruction::ROR_ABS);
+        INSERT_INST(Instruction::ROR_ABSX);
 
         INSERT_INST(Instruction::NOP);
     }
