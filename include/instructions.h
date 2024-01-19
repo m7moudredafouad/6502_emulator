@@ -99,6 +99,28 @@ enum Instruction : uint8_t {
     // DEY Decrement Index Y by One
     DEY = 0x88,
 
+    // EOR Exclusive-OR Memory with Accumulator
+    EOR_IMM = 0x49,
+    EOR_ZP = 0x45,
+    EOR_ZPX = 0x55,
+    EOR_ABS = 0x4D,
+    EOR_ABSX = 0x5D,
+    EOR_ABSY = 0x59,
+    EOR_INDX = 0x41,
+    EOR_INDY = 0x51,
+
+    // INC Increment Memory by One
+    INC_ZP = 0xE6,
+    INC_ZPX = 0xF6,
+    INC_ABS = 0xEE,
+    INC_ABSX = 0xFE,
+
+    // INX Increment Index X by One
+    INX = 0xEA,
+
+    // INY Increment Index Y by One
+    INY = 0xC8,
+    
     // NOP No Operation
     NOP = 0xEA,
 

@@ -333,7 +333,7 @@ void INST_DEC(CPU& cpu, uint8_t op_code) {
 void INST_DEX(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::DEX: {
-        cpu.Y--;
+        cpu.X--;
         cpu.mem_read(0); // add one cycle
     } break;
     default:
@@ -347,7 +347,102 @@ void INST_DEX(CPU& cpu, uint8_t op_code) {
 void INST_DEY(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::DEY: {
-        cpu.X--;
+        cpu.Y--;
+        cpu.mem_read(0); // add one cycle
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    cpu.SR.N = SIGN_BIT(cpu.Y);
+    cpu.SR.Z = (cpu.Y);
+}
+
+void INST_EOR(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::CMP_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::CMP_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::CMP_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::CMP_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::CMP_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    case Instruction::CMP_ABSY: {
+        address = AbsoluteYAddress(cpu);
+    } break;
+    case Instruction::CMP_INDX: {
+        address = IndexedIndirectAddress(cpu);
+    } break;
+    case Instruction::CMP_INDY: {
+        address = IndirectIndexedAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    uint8_t result = cpu.AC ^ cpu.mem_read(address);
+
+    cpu.SR.N = SIGN_BIT(result);
+    cpu.SR.Z = (result == 0);
+}
+
+void INST_INC(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::INC_ZP: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::INC_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::INC_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::INC_ABSX: {
+        address = AbsoluteXAddress(cpu, true);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    uint8_t value = cpu.mem_read(address);
+    value++;
+    cpu.mem_read(0); // add one cycle
+    cpu.mem_write(address, value);
+
+    cpu.SR.N = SIGN_BIT(value);
+    cpu.SR.Z = (value == 0);
+}
+
+void INST_INX(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::INX: {
+        cpu.X++;
+        cpu.mem_read(0); // add one cycle
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    cpu.SR.N = SIGN_BIT(cpu.X);
+    cpu.SR.Z = (cpu.X);
+}
+
+void INST_INY(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::INY: {
+        cpu.Y++;
         cpu.mem_read(0); // add one cycle
     } break;
     default:
@@ -508,6 +603,19 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::DEX] = INST_DEX;
     inst_map[Instruction::DEY] = INST_DEY;
 
+    inst_map[Instruction::EOR_IMM] = inst_map[Instruction::EOR_ZP] =
+        inst_map[Instruction::EOR_ZPX] = inst_map[Instruction::EOR_ABS] =
+            inst_map[Instruction::EOR_ABSX] = inst_map[Instruction::EOR_ABSY] =
+                inst_map[Instruction::EOR_INDX] =
+                    inst_map[Instruction::EOR_INDY] = INST_EOR;
+
+    inst_map[Instruction::INC_ZP] = inst_map[Instruction::INC_ZPX] =
+        inst_map[Instruction::INC_ABS] = inst_map[Instruction::INC_ABSX] =
+            INST_INC;
+
+    inst_map[Instruction::INX] = INST_INX;
+    inst_map[Instruction::INY] = INST_INY;
+
     inst_map[Instruction::NOP] = INST_NOP;
 
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
@@ -594,6 +702,23 @@ std::string ToString(Instruction inst) {
 
         INSERT_INST(Instruction::DEX);
         INSERT_INST(Instruction::DEY);
+
+        INSERT_INST(Instruction::EOR_IMM);
+        INSERT_INST(Instruction::EOR_ZP);
+        INSERT_INST(Instruction::EOR_ZPX);
+        INSERT_INST(Instruction::EOR_ABS);
+        INSERT_INST(Instruction::EOR_ABSX);
+        INSERT_INST(Instruction::EOR_ABSY);
+        INSERT_INST(Instruction::EOR_INDX);
+        INSERT_INST(Instruction::EOR_INDY);
+
+        INSERT_INST(Instruction::INC_ZP);
+        INSERT_INST(Instruction::INC_ZPX);
+        INSERT_INST(Instruction::INC_ABS);
+        INSERT_INST(Instruction::INC_ABSX);
+
+        INSERT_INST(Instruction::INX);
+        INSERT_INST(Instruction::INY);
 
         INSERT_INST(Instruction::NOP);
 
