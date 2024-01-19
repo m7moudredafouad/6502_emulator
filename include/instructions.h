@@ -224,23 +224,23 @@ enum Instruction : uint8_t {
     SEI = 0x78,
 
     // STA Load Accumulator with Memory
-    // STA_ZP = 0x85,
-    // STA_ZPX = 0x95,
-    // STA_ABS = 0x8D,
-    // STA_ABSX = 0x9D,
-    // STA_ABSY = 0x99,
-    // STA_INDX = 0x81,
-    // STA_INDY = 0x91,
+    STA_ZP = 0x85,
+    STA_ZPX = 0x95,
+    STA_ABS = 0x8D,
+    STA_ABSX = 0x9D,
+    STA_ABSY = 0x99,
+    STA_INDX = 0x81,
+    STA_INDY = 0x91,
 
     // STX Load Index X with Memory
-    // STX_ZP = 0x86,
-    // STX_ZPY = 0x96,
-    // STX_ABS = 0x8E,
+    STX_ZP = 0x86,
+    STX_ZPY = 0x96,
+    STX_ABS = 0x8E,
 
     // LDY Load Index Y with Memory
-    // LDY_ZP = 0x84,
-    // LDY_ZPX = 0x94,
-    // LDY_ABS = 0x8C,
+    STY_ZP = 0x84,
+    STY_ZPX = 0x94,
+    STY_ABS = 0x8C,
 
     // TAX Transfer Accumulator to Index X
     // TAX = 0xAA,
