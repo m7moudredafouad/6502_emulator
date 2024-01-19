@@ -163,14 +163,14 @@ enum Instruction : uint8_t {
     NOP = 0xEA,
 
     // ORA OR Memory with Accumulator
-    // ORA_IMM = 0x09,
-    // ORA_ZP = 0x05,
-    // ORA_ZPX = 0x15,
-    // ORA_ABS = 0x0D,
-    // ORA_ABSX = 0x1D,
-    // ORA_ABSY = 0x19,
-    // ORA_INDX = 0x01,
-    // ORA_INDY = 0x11,
+    ORA_IMM = 0x09,
+    ORA_ZP = 0x05,
+    ORA_ZPX = 0x15,
+    ORA_ABS = 0x0D,
+    ORA_ABSX = 0x1D,
+    ORA_ABSY = 0x19,
+    ORA_INDX = 0x01,
+    ORA_INDY = 0x11,
 
     // PHA Push Accumulator on Stack
     // PHA = 0x48,

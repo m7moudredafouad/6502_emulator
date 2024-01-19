@@ -8,6 +8,8 @@
 #define ISTRUCTION_UNREACHABLE(op)                                             \
     ASSERT(0, "Unknown op_code: 0x" << std::hex << int(op) << std::dec)
 
+#define ADD_CYCLE(cpu) cpu.mem_read(0)
+
 void INST_ADC(CPU& cpu, uint8_t op_code) {
     uint16_t address;
 
@@ -114,7 +116,7 @@ void INST_ASL(CPU& cpu, uint8_t op_code) {
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.mem_read(0); // Just to add 1 Cycle
+    ADD_CYCLE(cpu);
     uint16_t val = 0;
 
     if (op_code == Instruction::ASL_ACC) {
@@ -165,7 +167,7 @@ void INST_BRANCH(CPU& cpu, uint8_t op_code) {
     }
 
     if (condition) {
-        cpu.mem_read(0); // Just to add 1 Cycle
+        ADD_CYCLE(cpu);
         cpu.PC = cpu.get_address(cpu.PC, offset);
     }
 }
@@ -208,7 +210,7 @@ void INST_STATUS(CPU& cpu, uint8_t op_code) {
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.mem_read(0);
+    ADD_CYCLE(cpu);
 }
 
 void INST_CMP(CPU& cpu, uint8_t op_code) {
@@ -323,7 +325,7 @@ void INST_DEC(CPU& cpu, uint8_t op_code) {
 
     uint8_t value = cpu.mem_read(address);
     value--;
-    cpu.mem_read(0); // add one cycle
+    ADD_CYCLE(cpu);
     cpu.mem_write(address, value);
 
     cpu.SR.N = SIGN_BIT(value);
@@ -334,12 +336,12 @@ void INST_DEX(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::DEX: {
         cpu.X--;
-        cpu.mem_read(0); // add one cycle
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
+    ADD_CYCLE(cpu);
     cpu.SR.N = SIGN_BIT(cpu.X);
     cpu.SR.Z = (cpu.X);
 }
@@ -348,12 +350,12 @@ void INST_DEY(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::DEY: {
         cpu.Y--;
-        cpu.mem_read(0); // add one cycle
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
+    ADD_CYCLE(cpu);
     cpu.SR.N = SIGN_BIT(cpu.Y);
     cpu.SR.Z = (cpu.Y);
 }
@@ -418,7 +420,7 @@ void INST_INC(CPU& cpu, uint8_t op_code) {
 
     uint8_t value = cpu.mem_read(address);
     value++;
-    cpu.mem_read(0); // add one cycle
+    ADD_CYCLE(cpu);
     cpu.mem_write(address, value);
 
     cpu.SR.N = SIGN_BIT(value);
@@ -429,12 +431,12 @@ void INST_INX(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::INX: {
         cpu.X++;
-        cpu.mem_read(0); // add one cycle
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
+    ADD_CYCLE(cpu);
     cpu.SR.N = SIGN_BIT(cpu.X);
     cpu.SR.Z = (cpu.X);
 }
@@ -443,12 +445,12 @@ void INST_INY(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::INY: {
         cpu.Y++;
-        cpu.mem_read(0); // add one cycle
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
+    ADD_CYCLE(cpu);
     cpu.SR.N = SIGN_BIT(cpu.Y);
     cpu.SR.Z = (cpu.Y);
 }
@@ -460,16 +462,6 @@ void INST_JMP(CPU& cpu, uint8_t op_code) {
     } break;
     case Instruction::JMP_IND: {
         cpu.PC = IndirectAddress(cpu);
-    } break;
-    default:
-        ISTRUCTION_UNREACHABLE(op_code);
-    }
-}
-
-void INST_NOP(CPU& cpu, uint8_t op_code) {
-    switch (op_code) {
-    case Instruction::NOP: {
-        cpu.mem_read(0); // Just to add 1 Cycle
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -569,6 +561,94 @@ void INST_LDY(CPU& cpu, uint8_t op_code) {
     cpu.SR.Z = cpu.Y == 0;
 }
 
+void INST_LSR(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::LSR_ACC:
+        break;
+    case Instruction::LSR_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::LSR_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::LSR_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::LSR_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    ADD_CYCLE(cpu);
+    uint16_t val = 0;
+
+    if (op_code == Instruction::LSR_ACC) {
+        val = cpu.AC;
+        cpu.SR.C = GET_BIT(val, 0);
+        val >>= 1;
+        cpu.AC = val & 0xFF;
+    } else {
+        val = cpu.mem_read(address);
+        cpu.SR.C = GET_BIT(val, 0);
+        val >>= 1;
+        cpu.mem_write(address, val & 0xFF);
+    }
+
+    cpu.SR.N = 0;
+    cpu.SR.Z = val == 0;
+}
+
+void INST_NOP(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::NOP: {
+        ADD_CYCLE(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
+void INST_ORA(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::ORA_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::ORA_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::ORA_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::ORA_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::ORA_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    case Instruction::ORA_ABSY: {
+        address = AbsoluteYAddress(cpu);
+    } break;
+    case Instruction::ORA_INDX: {
+        address = IndexedIndirectAddress(cpu);
+    } break;
+    case Instruction::ORA_INDY: {
+        address = IndirectIndexedAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    cpu.AC = cpu.AC | cpu.mem_read(address);
+    cpu.SR.N = SIGN_BIT(cpu.AC);
+    cpu.SR.Z = cpu.AC == 0;
+}
+
 void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::ADC_IMM] = inst_map[Instruction::ADC_ZP] =
         inst_map[Instruction::ADC_ZPX] = inst_map[Instruction::ADC_ABS] =
@@ -631,8 +711,6 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
 
     inst_map[Instruction::JMP_ABS] = inst_map[Instruction::JMP_IND] = INST_JMP;
 
-    inst_map[Instruction::NOP] = INST_NOP;
-
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
         inst_map[Instruction::LDA_ZPX] = inst_map[Instruction::LDA_ABS] =
             inst_map[Instruction::LDA_ABSX] = inst_map[Instruction::LDA_ABSY] =
@@ -646,6 +724,18 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::LDY_IMM] = inst_map[Instruction::LDY_ZP] =
         inst_map[Instruction::LDY_ZPX] = inst_map[Instruction::LDY_ABS] =
             inst_map[Instruction::LDY_ABSX] = INST_LDY;
+
+    inst_map[Instruction::LSR_ACC] = inst_map[Instruction::LSR_ZP] =
+        inst_map[Instruction::LSR_ZPX] = inst_map[Instruction::LSR_ABS] =
+            inst_map[Instruction::LSR_ABSX] = INST_LSR;
+
+    inst_map[Instruction::NOP] = INST_NOP;
+
+    inst_map[Instruction::ORA_IMM] = inst_map[Instruction::ORA_ZP] =
+        inst_map[Instruction::ORA_ZPX] = inst_map[Instruction::ORA_ABS] =
+            inst_map[Instruction::ORA_ABSX] = inst_map[Instruction::ORA_ABSY] =
+                inst_map[Instruction::ORA_INDX] =
+                    inst_map[Instruction::ORA_INDY] = INST_ORA;
 }
 
 std::string ToString(Instruction inst) {
@@ -738,8 +828,6 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::JMP_ABS);
         INSERT_INST(Instruction::JMP_IND);
 
-        INSERT_INST(Instruction::NOP);
-
         INSERT_INST(Instruction::LDA_IMM);
         INSERT_INST(Instruction::LDA_ZP);
         INSERT_INST(Instruction::LDA_ZPX);
@@ -760,6 +848,23 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::LDY_ZPX);
         INSERT_INST(Instruction::LDY_ABS);
         INSERT_INST(Instruction::LDY_ABSX);
+
+        INSERT_INST(Instruction::LSR_ACC);
+        INSERT_INST(Instruction::LSR_ZP);
+        INSERT_INST(Instruction::LSR_ZPX);
+        INSERT_INST(Instruction::LSR_ABS);
+        INSERT_INST(Instruction::LSR_ABSX);
+
+        INSERT_INST(Instruction::ORA_IMM);
+        INSERT_INST(Instruction::ORA_ZP);
+        INSERT_INST(Instruction::ORA_ZPX);
+        INSERT_INST(Instruction::ORA_ABS);
+        INSERT_INST(Instruction::ORA_ABSX);
+        INSERT_INST(Instruction::ORA_ABSY);
+        INSERT_INST(Instruction::ORA_INDX);
+        INSERT_INST(Instruction::ORA_INDY);
+
+        INSERT_INST(Instruction::NOP);
     }
 #undef INSERT_INST
 
