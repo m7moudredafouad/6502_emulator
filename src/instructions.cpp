@@ -301,6 +301,63 @@ void INST_CMY(CPU& cpu, uint8_t op_code) {
     cpu.SR.C = (value >= cpu.Y);
 }
 
+void INST_DEC(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::DEC_ZP: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::DEC_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::DEC_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::DEC_ABSX: {
+        address = AbsoluteXAddress(cpu, true);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    uint8_t value = cpu.mem_read(address);
+    value--;
+    cpu.mem_read(0); // add one cycle
+    cpu.mem_write(address, value);
+
+    cpu.SR.N = SIGN_BIT(value);
+    cpu.SR.Z = (value == 0);
+}
+
+void INST_DEX(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::DEX: {
+        cpu.Y--;
+        cpu.mem_read(0); // add one cycle
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    cpu.SR.N = SIGN_BIT(cpu.X);
+    cpu.SR.Z = (cpu.X);
+}
+
+void INST_DEY(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::DEY: {
+        cpu.X--;
+        cpu.mem_read(0); // add one cycle
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    cpu.SR.N = SIGN_BIT(cpu.Y);
+    cpu.SR.Z = (cpu.Y);
+}
+
 void INST_NOP(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::NOP: {
@@ -444,6 +501,13 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::CMY_IMM] = inst_map[Instruction::CMY_ZP] =
         inst_map[Instruction::CMY_ABS] = INST_CMY;
 
+    inst_map[Instruction::DEC_ZP] = inst_map[Instruction::DEC_ZPX] =
+        inst_map[Instruction::DEC_ABS] = inst_map[Instruction::DEC_ABSX] =
+            INST_DEC;
+
+    inst_map[Instruction::DEX] = INST_DEX;
+    inst_map[Instruction::DEY] = INST_DEY;
+
     inst_map[Instruction::NOP] = INST_NOP;
 
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
@@ -522,6 +586,14 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::CMY_IMM);
         INSERT_INST(Instruction::CMY_ZP);
         INSERT_INST(Instruction::CMY_ABS);
+
+        INSERT_INST(Instruction::DEC_ZP);
+        INSERT_INST(Instruction::DEC_ZPX);
+        INSERT_INST(Instruction::DEC_ABS);
+        INSERT_INST(Instruction::DEC_ABSX);
+
+        INSERT_INST(Instruction::DEX);
+        INSERT_INST(Instruction::DEY);
 
         INSERT_INST(Instruction::NOP);
 

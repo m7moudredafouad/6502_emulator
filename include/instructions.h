@@ -87,6 +87,17 @@ enum Instruction : uint8_t {
     CMY_ZP = 0xC4,
     CMY_ABS = 0xCC,
 
+    // DEC Decrement Memory by One
+    DEC_ZP = 0xC6,
+    DEC_ZPX = 0xD6,
+    DEC_ABS = 0xCE,
+    DEC_ABSX = 0xDE,
+
+    // DEX Decrement Index X by One
+    DEX = 0xCA,
+
+    // DEY Decrement Index Y by One
+    DEY = 0x88,
 
     // NOP No Operation
     NOP = 0xEA,
