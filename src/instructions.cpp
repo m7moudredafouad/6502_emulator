@@ -775,6 +775,55 @@ void INST_ROR(CPU& cpu, uint8_t op_code) {
     cpu.SR.Z = cpu.AC == 0;
 }
 
+void INST_SBC(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::SBC_IMM: {
+        address = ImmediateAddress(cpu);
+    } break;
+    case Instruction::SBC_ZP: {
+        address = ZeroPageAddress(cpu);
+    } break;
+    case Instruction::SBC_ZPX: {
+        address = ZeroPageXAddress(cpu);
+    } break;
+    case Instruction::SBC_ABS: {
+        address = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::SBC_ABSX: {
+        address = AbsoluteXAddress(cpu);
+    } break;
+    case Instruction::SBC_ABSY: {
+        address = AbsoluteYAddress(cpu);
+    } break;
+    case Instruction::SBC_INDX: {
+        address = IndexedIndirectAddress(cpu);
+    } break;
+    case Instruction::SBC_INDY: {
+        address = IndirectIndexedAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+
+    uint8_t operand = cpu.mem_read(address);
+    uint8_t ac = cpu.AC;
+    uint16_t val = cpu.AC - operand - (1 - cpu.SR.C);
+    cpu.AC = (val & 0xFF);
+
+    cpu.SR.N = SIGN_BIT(cpu.AC);
+    cpu.SR.Z = cpu.AC == 0;
+
+    cpu.SR.V = 0;
+    if ((SIGN_BIT(ac) == SIGN_BIT(operand))) {
+        cpu.SR.V = (SIGN_BIT(ac) != SIGN_BIT(cpu.AC));
+        if (cpu.SR.V) {
+            cpu.SR.C = 0;
+        }
+    }
+}
+
 void INST_STA(CPU& cpu, uint8_t op_code) {
     uint16_t address;
 
@@ -979,6 +1028,12 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
         inst_map[Instruction::ROR_ZPX] = inst_map[Instruction::ROR_ABS] =
             inst_map[Instruction::ROR_ABSX] = INST_ROR;
 
+    inst_map[Instruction::SBC_IMM] = inst_map[Instruction::SBC_ZP] =
+        inst_map[Instruction::SBC_ZPX] = inst_map[Instruction::SBC_ABS] =
+            inst_map[Instruction::SBC_ABSX] = inst_map[Instruction::SBC_ABSY] =
+                inst_map[Instruction::SBC_INDX] =
+                    inst_map[Instruction::SBC_INDY] = INST_SBC;
+
     inst_map[Instruction::STA_ZP] = inst_map[Instruction::STA_ZPX] =
         inst_map[Instruction::STA_ABS] = inst_map[Instruction::STA_ABSX] =
             inst_map[Instruction::STA_ABSY] = inst_map[Instruction::STA_INDX] =
@@ -1141,6 +1196,15 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::ROR_ZPX);
         INSERT_INST(Instruction::ROR_ABS);
         INSERT_INST(Instruction::ROR_ABSX);
+
+        INSERT_INST(Instruction::SBC_IMM);
+        INSERT_INST(Instruction::SBC_ZP);
+        INSERT_INST(Instruction::SBC_ZPX);
+        INSERT_INST(Instruction::SBC_ABS);
+        INSERT_INST(Instruction::SBC_ABSX);
+        INSERT_INST(Instruction::SBC_ABSY);
+        INSERT_INST(Instruction::SBC_INDX);
+        INSERT_INST(Instruction::SBC_INDY);
 
         INSERT_INST(Instruction::SEC);
         INSERT_INST(Instruction::SED);

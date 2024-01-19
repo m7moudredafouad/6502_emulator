@@ -205,14 +205,14 @@ enum Instruction : uint8_t {
     // RTS = 0x60,
     
     // SBC Subtract Memory from Accumulator with Borrow
-    // SBC_IMM = 0xE9,
-    // SBC_ZP = 0xE5,
-    // SBC_ZPX = 0xF5,
-    // SBC_ABS = 0xED,
-    // SBC_ABSX = 0xFD,
-    // SBC_ABSY = 0xF9,
-    // SBC_INDX = 0xE1,
-    // SBC_INDY = 0xF1,
+    SBC_IMM = 0xE9,
+    SBC_ZP = 0xE5,
+    SBC_ZPX = 0xF5,
+    SBC_ABS = 0xED,
+    SBC_ABSX = 0xFD,
+    SBC_ABSY = 0xF9,
+    SBC_INDX = 0xE1,
+    SBC_INDY = 0xF1,
 
     // SEC Set Carry Flag
     SEC = 0x38,
