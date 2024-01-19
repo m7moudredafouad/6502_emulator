@@ -116,10 +116,14 @@ enum Instruction : uint8_t {
     INC_ABSX = 0xFE,
 
     // INX Increment Index X by One
-    INX = 0xEA,
+    INX = 0xE8,
 
     // INY Increment Index Y by One
     INY = 0xC8,
+
+    // JMP Jump to New Location
+    JMP_ABS = 0x4C,
+    JMP_IND = 0x6C,
     
     // NOP No Operation
     NOP = 0xEA,

@@ -453,6 +453,19 @@ void INST_INY(CPU& cpu, uint8_t op_code) {
     cpu.SR.Z = (cpu.Y);
 }
 
+void INST_JMP(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::JMP_ABS: {
+        cpu.PC = AbsoluteAddress(cpu);
+    } break;
+    case Instruction::JMP_IND: {
+        cpu.PC = IndirectAddress(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
 void INST_NOP(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::NOP: {
@@ -616,6 +629,8 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::INX] = INST_INX;
     inst_map[Instruction::INY] = INST_INY;
 
+    inst_map[Instruction::JMP_ABS] = inst_map[Instruction::JMP_IND] = INST_JMP;
+
     inst_map[Instruction::NOP] = INST_NOP;
 
     inst_map[Instruction::LDA_IMM] = inst_map[Instruction::LDA_ZP] =
@@ -719,6 +734,9 @@ std::string ToString(Instruction inst) {
 
         INSERT_INST(Instruction::INX);
         INSERT_INST(Instruction::INY);
+
+        INSERT_INST(Instruction::JMP_ABS);
+        INSERT_INST(Instruction::JMP_IND);
 
         INSERT_INST(Instruction::NOP);
 

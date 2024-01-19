@@ -36,6 +36,13 @@ uint16_t AbsoluteYAddress(CPU& cpu, bool force_cycle) {
     return cpu.get_address(address_from_bytes(low, high), cpu.Y, force_cycle);
 }
 
+uint16_t IndirectAddress(CPU& cpu) {
+    uint16_t abs_add = AbsoluteAddress(cpu);
+    uint8_t low = cpu.mem_read(abs_add);
+    uint8_t high = cpu.mem_read(abs_add + 1);
+    return address_from_bytes(low, high);
+}
+
 uint16_t IndexedIndirectAddress(CPU& cpu) {
     uint16_t address = cpu.get_address(cpu.Fetch(), cpu.X);
     uint8_t low = cpu.mem_read(address++);
