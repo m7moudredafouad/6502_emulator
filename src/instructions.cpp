@@ -2,9 +2,6 @@
 #include <instructions.h>
 #include <iostream>
 
-#define GET_BIT(value, bit) (((value) >> (bit)) & 0x1)
-#define SIGN_BIT(value) GET_BIT((value), 7)
-
 #define ISTRUCTION_UNREACHABLE(op)                                             \
     ASSERT(0, "Unknown op_code: 0x" << std::hex << int(op) << std::dec)
 
@@ -220,6 +217,26 @@ void INST_STATUS(CPU& cpu, uint8_t op_code) {
     }
 
     ADD_CYCLE(cpu);
+}
+
+void INST_BRK(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::BRK: {
+        auto [low, high] = bytes_from_address(cpu.PC);
+
+        cpu.PUSH(low);
+        cpu.PUSH(high);
+        cpu.PUSH(cpu.SR.Value());
+
+        cpu.PC = address_from_bytes(cpu.mem_read(0xFFFE), cpu.mem_read(0xFFFF));
+
+        cpu.SR.B = 1;
+
+        ADD_CYCLE(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
 }
 
 void INST_CMP(CPU& cpu, uint8_t op_code) {
@@ -693,14 +710,7 @@ void INST_PULL(CPU& cpu, uint8_t op_code) {
         cpu.AC = cpu.POP();
     } break;
     case Instruction::PLP: {
-        uint8_t val = cpu.POP();
-        cpu.SR.N = GET_BIT(val, 7);
-        cpu.SR.V = GET_BIT(val, 6);
-        cpu.SR.B = GET_BIT(val, 4);
-        cpu.SR.D = GET_BIT(val, 3);
-        cpu.SR.I = GET_BIT(val, 2);
-        cpu.SR.Z = GET_BIT(val, 1);
-        cpu.SR.C = GET_BIT(val, 0);
+        cpu.SR.Set(cpu.POP());
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -789,12 +799,24 @@ void INST_ROR(CPU& cpu, uint8_t op_code) {
     cpu.SR.Z = cpu.AC == 0;
 }
 
+void INST_RTI(CPU& cpu, uint8_t op_code) {
+    switch (op_code) {
+    case Instruction::RTI: {
+        cpu.SR.Set(cpu.POP());
+        cpu.PC = address_from_bytes(cpu.POP(), cpu.POP());
+        ADD_CYCLE(cpu);
+        ADD_CYCLE(cpu);
+
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
 void INST_RTS(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::RTS: {
-        auto low = cpu.POP();
-        auto high = cpu.POP();
-        cpu.PC = address_from_bytes(low, high);
+        cpu.PC = address_from_bytes(cpu.POP(), cpu.POP());
         ADD_CYCLE(cpu);
         ADD_CYCLE(cpu);
         ADD_CYCLE(cpu);
@@ -986,6 +1008,8 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
             inst_map[Instruction::SEC] = inst_map[Instruction::SED] =
                 inst_map[Instruction::SEI] = INST_STATUS;
 
+    inst_map[Instruction::BRK] = INST_BRK;
+
     inst_map[Instruction::CMP_IMM] = inst_map[Instruction::CMP_ZP] =
         inst_map[Instruction::CMP_ZPX] = inst_map[Instruction::CMP_ABS] =
             inst_map[Instruction::CMP_ABSX] = inst_map[Instruction::CMP_ABSY] =
@@ -1059,6 +1083,7 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
         inst_map[Instruction::ROR_ZPX] = inst_map[Instruction::ROR_ABS] =
             inst_map[Instruction::ROR_ABSX] = INST_ROR;
 
+    inst_map[Instruction::RTI] = INST_RTI;
     inst_map[Instruction::RTS] = INST_RTS;
 
     inst_map[Instruction::SBC_IMM] = inst_map[Instruction::SBC_ZP] =
@@ -1123,6 +1148,8 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::BPL);
         INSERT_INST(Instruction::BVC);
         INSERT_INST(Instruction::BVS);
+
+        INSERT_INST(Instruction::BRK);
 
         INSERT_INST(Instruction::CLC);
         INSERT_INST(Instruction::CLD);
@@ -1232,6 +1259,7 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::ROR_ABS);
         INSERT_INST(Instruction::ROR_ABSX);
 
+        INSERT_INST(Instruction::RTI);
         INSERT_INST(Instruction::RTS);
 
         INSERT_INST(Instruction::SBC_IMM);

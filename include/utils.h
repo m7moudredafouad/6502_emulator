@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#define GET_BIT(value, bit) (((value) >> (bit)) & 0x1)
+#define SIGN_BIT(value) GET_BIT((value), 7)
+
 #define ASSERT(expr, msg)                                                      \
     if (!expr) {                                                               \
         std::cout << "Assertion Error in " << __FILE__ << ":" << __LINE__      \

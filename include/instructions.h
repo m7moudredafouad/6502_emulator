@@ -53,7 +53,7 @@ enum Instruction : uint8_t {
     BPL = 0x10,
 
     // BRK Force Break
-    // BRK = 0x00,
+    BRK = 0x00,
 
     // BVC Branch on Overflow Clear
     BVC = 0x50,
@@ -199,7 +199,7 @@ enum Instruction : uint8_t {
     ROR_ABSX = 0x7E,
 
     // RTI Return from Interrupt
-    // RTI = 0x40,
+    RTI = 0x40,
 
     // RTS Return from Subroutine
     RTS = 0x60,

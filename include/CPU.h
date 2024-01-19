@@ -30,6 +30,16 @@ class CPU {
         uint8_t C : 1;        // Carry
 
         uint8_t Value() { return N << V << 1 << B << D << I << Z << C; }
+
+        void Set(uint8_t val) {
+            N = GET_BIT(val, 7);
+            V = GET_BIT(val, 6);
+            B = GET_BIT(val, 4);
+            D = GET_BIT(val, 3);
+            I = GET_BIT(val, 2);
+            Z = GET_BIT(val, 1);
+            C = GET_BIT(val, 0);
+        }
     } SR; // status register[NV - BDIZC](8 bit)
 
     uint16_t SP; // stack pointer (8 bit)
