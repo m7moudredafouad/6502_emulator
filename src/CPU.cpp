@@ -5,11 +5,11 @@
 
 /* CPU */
 CPU::CPU(uint8_t* program, uint16_t size)
-    : PC(0xFCFF), AC(0), X(0), Y(0), SR({0, 0, 0, 0, 0, 0, 0, 0}), SP(0x0100),
+    : PC(0), AC(0), X(0), Y(0), SR({0, 0, 0, 0, 0, 0, 0, 0}), SP(0x0100),
       m_program_size(size), m_cycles(0) {
     initialize_map(isa_map);
-    PC = 0x0200; // FIXME: Program start in memory
-    m_memory.write(PC, program, m_program_size);
+    m_memory.write(0, program, m_program_size);
+    PC = m_memory.read(0xFFFC);
 }
 
 void CPU::dump() {
@@ -39,7 +39,8 @@ uint8_t CPU::POP() {
 uint8_t CPU::Fetch() { return this->mem_read(PC++); }
 
 void CPU::Execute() {
-    while ((PC - 0x0200) < m_program_size) {
+    auto first_pc = PC;
+    while ((PC - first_pc) < m_program_size) {
 
         auto old_cycles = m_cycles;
 

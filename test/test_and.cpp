@@ -4,7 +4,7 @@
 
 static void check_registers(CPU& cpu, uint16_t cycles, size_t program_size) {
     EXPECT_EQ(cpu.GetCycles(), cycles);
-    EXPECT_EQ(cpu.PC, 0x200 + program_size);
+    EXPECT_EQ(cpu.PC, 0x00 + program_size);
 
     EXPECT_EQ(cpu.SR.N, ((cpu.AC & 0x80) > 0));
     EXPECT_EQ(cpu.SR.Z, (cpu.AC == 0));
@@ -34,7 +34,7 @@ TEST(ANDTestSuite, ZP) {
 }
 
 TEST(ANDTestSuite, ZPX) {
-    uint8_t program[] = {Instruction::AND_ZPX, 0x00};
+    uint8_t program[] = {Instruction::AND_ZPX, 0xF0};
     CPU cpu(program, sizeof(program));
     cpu.AC = 0xFF;
     cpu.Execute();
@@ -51,12 +51,12 @@ TEST(ANDTestSuite, ABS) {
 }
 
 TEST(ANDTestSuite, ABSX) {
-    uint8_t program[] = {Instruction::AND_ABSX, 0x00, 0x02};
+    uint8_t program[] = {Instruction::AND_ABSX, 0x00, 0xF2};
     CPU cpu(program, sizeof(program));
     cpu.AC = 0xFF;
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.AC, Instruction::AND_ABSX);
+    EXPECT_EQ(cpu.AC, 0x00);
 }
 
 TEST(ANDTestSuite, ABSX_CROSS) {

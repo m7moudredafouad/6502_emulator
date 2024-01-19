@@ -4,7 +4,7 @@
 
 static void check_registers(CPU& cpu, uint16_t cycles, size_t program_size) {
     EXPECT_EQ(cpu.GetCycles(), cycles);
-    EXPECT_EQ(cpu.PC, 0x200 + program_size);
+    EXPECT_EQ(cpu.PC, 0x00 + program_size);
 
     EXPECT_EQ(cpu.SR.N, ((cpu.X & 0x80) > 0));
     EXPECT_EQ(cpu.SR.Z, (cpu.X == 0));
@@ -29,7 +29,7 @@ TEST(LDXTestSuite, ZP) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 3, sizeof(program));
-    EXPECT_EQ(cpu.X, 0x0);
+    EXPECT_EQ(cpu.X, 0x01);
 }
 
 TEST(LDXTestSuite, ZPY) {
@@ -37,11 +37,11 @@ TEST(LDXTestSuite, ZPY) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.X, 0x0);
+    EXPECT_EQ(cpu.X, Instruction::LDX_ZPY);
 }
 
 TEST(LDXTestSuite, ABS) {
-    uint8_t program[] = {Instruction::LDX_ABS, 0x00, 0x02};
+    uint8_t program[] = {Instruction::LDX_ABS, 0x00, 0x00};
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
@@ -49,7 +49,7 @@ TEST(LDXTestSuite, ABS) {
 }
 
 TEST(LDXTestSuite, ABSY) {
-    uint8_t program[] = {Instruction::LDX_ABSY, 0x00, 0x02};
+    uint8_t program[] = {Instruction::LDX_ABSY, 0x00, 0x00};
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));

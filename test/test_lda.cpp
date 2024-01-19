@@ -4,7 +4,7 @@
 
 static void check_registers(CPU& cpu, uint16_t cycles, size_t program_size) {
     EXPECT_EQ(cpu.GetCycles(), cycles);
-    EXPECT_EQ(cpu.PC, 0x200 + program_size);
+    EXPECT_EQ(cpu.PC, 0x00 + program_size);
 
     EXPECT_EQ(cpu.SR.N, ((cpu.AC & 0x80) > 0));
     EXPECT_EQ(cpu.SR.Z, (cpu.AC == 0));
@@ -25,16 +25,16 @@ TEST(LDATestSuite, BigProgram) {
         Instruction::LDA_ZP,
         0x01,
         Instruction::LDA_ZPX,
-        0x00,
+        0xF0,
         Instruction::LDA_ABS,
         0x00,
-        0x02,
+        0xF2,
     };
 
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 15, sizeof(program));
-    EXPECT_EQ(cpu.AC, 0xA9);
+    EXPECT_EQ(cpu.AC, 0x00);
 }
 
 TEST(LDATestSuite, IMM) {
@@ -46,7 +46,7 @@ TEST(LDATestSuite, IMM) {
 }
 
 TEST(LDATestSuite, ZP) {
-    uint8_t program[] = {Instruction::LDA_ZP, 0x01};
+    uint8_t program[] = {Instruction::LDA_ZP, 0xF1};
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 3, sizeof(program));
@@ -58,7 +58,7 @@ TEST(LDATestSuite, ZPX) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.AC, 0x0);
+    EXPECT_EQ(cpu.AC, Instruction::LDA_ZPX);
 }
 
 TEST(LDATestSuite, ABS) {
@@ -66,7 +66,7 @@ TEST(LDATestSuite, ABS) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.AC, Instruction::LDA_ABS);
+    EXPECT_EQ(cpu.AC, 0);
 }
 
 TEST(LDATestSuite, ABSX) {
@@ -74,7 +74,7 @@ TEST(LDATestSuite, ABSX) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.AC, Instruction::LDA_ABSX);
+    EXPECT_EQ(cpu.AC, 0);
 }
 
 TEST(LDATestSuite, ABSX_CROSS) {
@@ -91,7 +91,7 @@ TEST(LDATestSuite, ABSY) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.AC, Instruction::LDA_ABSY);
+    EXPECT_EQ(cpu.AC, 0);
 }
 
 TEST(LDATestSuite, INDX) {
