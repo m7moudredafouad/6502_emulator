@@ -53,7 +53,7 @@ enum Instruction : uint8_t {
     BPL = 0x10,
 
     // BRK Force Break
-    BRK = 0x00,
+    // BRK = 0x00,
 
     // BVC Branch on Overflow Clear
     BVC = 0x50,
@@ -243,22 +243,22 @@ enum Instruction : uint8_t {
     STY_ABS = 0x8C,
 
     // TAX Transfer Accumulator to Index X
-    // TAX = 0xAA,
+    TAX = 0xAA,
     
     // TAY Transfer Accumulator to Index Y
-    // TAY = 0xA8,
+    TAY = 0xA8,
 
     // TSX Transfer Stack Pointer to Index X
-    // TSX = 0xBA,
+    TSX = 0xBA,
 
     // TXA Transfer Index X to Accumulator
-    // TXA = 0x8A,
+    TXA = 0x8A,
 
     // TXS Transfer Index X to Stack Register
-    // TXS = 0x9A,
+    TXS = 0x9A,
 
     // TYA Transfer Index Y to Accumulator
-    // TYA = 0x98,
+    TYA = 0x98,
 };
 
 void initialize_map(std::unordered_map<uint8_t, inst_func_t>&);

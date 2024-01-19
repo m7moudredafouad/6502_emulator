@@ -847,6 +847,37 @@ void INST_STY(CPU& cpu, uint8_t op_code) {
     cpu.mem_write(address, cpu.Y);
 }
 
+void INST_TRANSFER(CPU& cpu, uint8_t op_code) {
+    uint16_t address;
+
+    switch (op_code) {
+    case Instruction::TAX: {
+        cpu.X = cpu.AC;
+        ADD_CYCLE(cpu);
+    } break;
+    case Instruction::TAY: {
+        ADD_CYCLE(cpu);
+        cpu.Y = cpu.AC;
+    } break;
+    case Instruction::TSX: {
+        cpu.X = cpu.mem_read(cpu.SP);
+    } break;
+    case Instruction::TXA: {
+        cpu.AC = cpu.X;
+        ADD_CYCLE(cpu);
+    } break;
+    case Instruction::TXS: {
+        cpu.mem_write(cpu.SP, cpu.X);
+    } break;
+    case Instruction::TYA: {
+        cpu.AC = cpu.X;
+        ADD_CYCLE(cpu);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
 void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::ADC_IMM] = inst_map[Instruction::ADC_ZP] =
         inst_map[Instruction::ADC_ZPX] = inst_map[Instruction::ADC_ABS] =
@@ -958,6 +989,11 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
 
     inst_map[Instruction::STY_ZP] = inst_map[Instruction::STY_ZPX] =
         inst_map[Instruction::STY_ABS] = INST_STY;
+
+    inst_map[Instruction::TAX] = inst_map[Instruction::TAY] =
+        inst_map[Instruction::TSX] = inst_map[Instruction::TXA] =
+            inst_map[Instruction::TXS] = inst_map[Instruction::TYA] =
+                INST_TRANSFER;
 }
 
 std::string ToString(Instruction inst) {
@@ -1092,6 +1128,8 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::PLA);
         INSERT_INST(Instruction::PLP);
 
+        INSERT_INST(Instruction::NOP);
+
         INSERT_INST(Instruction::ROL_ACC);
         INSERT_INST(Instruction::ROL_ZP);
         INSERT_INST(Instruction::ROL_ZPX);
@@ -1124,7 +1162,12 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::STY_ZPX);
         INSERT_INST(Instruction::STY_ABS);
 
-        INSERT_INST(Instruction::NOP);
+        INSERT_INST(Instruction::TAX);
+        INSERT_INST(Instruction::TAY);
+        INSERT_INST(Instruction::TSX);
+        INSERT_INST(Instruction::TXA);
+        INSERT_INST(Instruction::TXS);
+        INSERT_INST(Instruction::TYA);
     }
 #undef INSERT_INST
 
