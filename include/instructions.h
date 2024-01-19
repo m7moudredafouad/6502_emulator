@@ -215,13 +215,13 @@ enum Instruction : uint8_t {
     // SBC_INDY = 0xF1,
 
     // SEC Set Carry Flag
-    // SEC = 0x38,
+    SEC = 0x38,
 
     // SED Set Decimal Flag
-    // SED = 0xF8,
+    SED = 0xF8,
 
     // SEI Set Interrupt Disable Status
-    // SEI = 0x78,
+    SEI = 0x78,
 
     // STA Load Accumulator with Memory
     // STA_ZP = 0x85,

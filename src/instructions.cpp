@@ -206,6 +206,15 @@ void INST_STATUS(CPU& cpu, uint8_t op_code) {
     case Instruction::CLV: {
         cpu.SR.V = 0;
     } break;
+    case Instruction::SEC: {
+        cpu.SR.C = 1;
+    } break;
+    case Instruction::SED: {
+        cpu.SR.D = 1;
+    } break;
+    case Instruction::SEI: {
+        cpu.SR.I = 1;
+    } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
@@ -792,7 +801,9 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::BIT_ZP] = inst_map[Instruction::BIT_ABS] = INST_BIT;
 
     inst_map[Instruction::CLC] = inst_map[Instruction::CLD] =
-        inst_map[Instruction::CLI] = inst_map[Instruction::CLV] = INST_STATUS;
+        inst_map[Instruction::CLI] = inst_map[Instruction::CLV] =
+            inst_map[Instruction::SEC] = inst_map[Instruction::SED] =
+                inst_map[Instruction::SEI] = INST_STATUS;
 
     inst_map[Instruction::CMP_IMM] = inst_map[Instruction::CMP_ZP] =
         inst_map[Instruction::CMP_ZPX] = inst_map[Instruction::CMP_ABS] =
@@ -1009,6 +1020,10 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::ROR_ZPX);
         INSERT_INST(Instruction::ROR_ABS);
         INSERT_INST(Instruction::ROR_ABSX);
+
+        INSERT_INST(Instruction::SEC);
+        INSERT_INST(Instruction::SED);
+        INSERT_INST(Instruction::SEI);
 
         INSERT_INST(Instruction::NOP);
     }
