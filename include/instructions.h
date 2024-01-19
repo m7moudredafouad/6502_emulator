@@ -124,10 +124,11 @@ enum Instruction : uint8_t {
     // JMP Jump to New Location
     JMP_ABS = 0x4C,
     JMP_IND = 0x6C,
-    
-    // NOP No Operation
-    NOP = 0xEA,
 
+    // JSR Jump to New Location Saving Return Address
+    // JSR = 0x20,
+
+    // LDA Load Accumulator with Memory
     LDA_IMM = 0xA9,
     LDA_ZP = 0xA5,
     LDA_ZPX = 0xB5,
@@ -137,17 +138,120 @@ enum Instruction : uint8_t {
     LDA_INDX = 0xA1,
     LDA_INDY = 0xB1,
 
+    // LDX Load Index X with Memory
     LDX_IMM = 0xA2,
     LDX_ZP = 0xA6,
     LDX_ZPY = 0xB6,
     LDX_ABS = 0xAE,
     LDX_ABSY = 0xBE,
 
+    // LDY Load Index Y with Memory
     LDY_IMM = 0xA0,
     LDY_ZP = 0xA4,
     LDY_ZPX = 0xB4,
     LDY_ABS = 0xAC,
     LDY_ABSX = 0xBC,
+
+    // LSR Shift One Bit Right (Memory or Accumulator)
+    LSR_ACC = 0x4A,
+    LSR_ZP = 0x46,
+    LSR_ZPX = 0x56,
+    LSR_ABS = 0x4E,
+    LSR_ABSX = 0x5E,
+
+    // NOP No Operation
+    NOP = 0xEA,
+
+    // ORA OR Memory with Accumulator
+    // ORA_IMM = 0x09,
+    // ORA_ZP = 0x05,
+    // ORA_ZPX = 0x15,
+    // ORA_ABS = 0x0D,
+    // ORA_ABSX = 0x1D,
+    // ORA_ABSY = 0x19,
+    // ORA_INDX = 0x01,
+    // ORA_INDY = 0x11,
+
+    // PHA Push Accumulator on Stack
+    // PHA = 0x48,
+
+    // PHP Push Processor Status on Stack
+    // PHP = 0x08,
+
+    // PLA Pull Accumulator from Stack
+    // PLA = 0x68,
+
+    // PLP Pull Processor Status from Stack
+    // PLP = 0x28,
+
+    // ROL Rotate One Bit Left (Memory or Accumulator)
+    // ROL_ACC = 0x6A,
+    // ROL_ZP = 0x66,
+    // ROL_ZPX = 0x76,
+    // ROL_ABS = 0x6E,
+    // ROL_ABSX = 0x7E,
+
+    // RTI Return from Interrupt
+    // RTI = 0x40,
+
+    // RTS Return from Subroutine
+    // RTS = 0x60,
+    
+    // SBC Subtract Memory from Accumulator with Borrow
+    // SBC_IMM = 0xE9,
+    // SBC_ZP = 0xE5,
+    // SBC_ZPX = 0xF5,
+    // SBC_ABS = 0xED,
+    // SBC_ABSX = 0xFD,
+    // SBC_ABSY = 0xF9,
+    // SBC_INDX = 0xE1,
+    // SBC_INDY = 0xF1,
+
+    // SEC Set Carry Flag
+    // SEC = 0x38,
+
+    // SED Set Decimal Flag
+    // SED = 0xF8,
+
+    // SEI Set Interrupt Disable Status
+    // SEI = 0x78,
+
+    // STA Load Accumulator with Memory
+    // STA_ZP = 0x85,
+    // STA_ZPX = 0x95,
+    // STA_ABS = 0x8D,
+    // STA_ABSX = 0x9D,
+    // STA_ABSY = 0x99,
+    // STA_INDX = 0x81,
+    // STA_INDY = 0x91,
+
+    // STX Load Index X with Memory
+    // STX_ZP = 0x86,
+    // STX_ZPY = 0x96,
+    // STX_ABS = 0x8E,
+
+    // LDY Load Index Y with Memory
+    // LDY_ZP = 0x84,
+    // LDY_ZPX = 0x94,
+    // LDY_ABS = 0x8C,
+
+    // TAX Transfer Accumulator to Index X
+    // TAX = 0xAA,
+    
+    // TAY Transfer Accumulator to Index Y
+    // TAY = 0xA8,
+
+    // TSX Transfer Stack Pointer to Index X
+    // TSX = 0xBA,
+
+    // TXA Transfer Index X to Accumulator
+    // TXA = 0x8A,
+
+    // TXS Transfer Index X to Stack Register
+    // TXS = 0x9A,
+
+    // TYA Transfer Index Y to Accumulator
+    // TYA = 0x98,
 };
 
 void initialize_map(std::unordered_map<uint8_t, inst_func_t>&);
