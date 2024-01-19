@@ -28,7 +28,9 @@ class CPU {
         uint8_t I : 1;        // Interrupt(IRQ disable)
         uint8_t Z : 1;        // Zero
         uint8_t C : 1;        // Carry
-    } SR;                     // status register[NV - BDIZC](8 bit)
+
+        uint8_t Value() { return N << V << 1 << B << D << I << Z << C; }
+    } SR; // status register[NV - BDIZC](8 bit)
 
     uint16_t SP; // stack pointer (8 bit)
 
@@ -46,7 +48,8 @@ class CPU {
     }
 
     template <typename address_t>
-    uint16_t get_address(address_t base_address, uint8_t offset, bool force_cycle = false) {
+    uint16_t get_address(address_t base_address, uint8_t offset,
+                         bool force_cycle = false) {
         uint16_t address = base_address + offset;
 
         // FIXME: Not sure why, but it's needed for ZPX

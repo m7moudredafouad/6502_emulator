@@ -649,6 +649,40 @@ void INST_ORA(CPU& cpu, uint8_t op_code) {
     cpu.SR.Z = cpu.AC == 0;
 }
 
+void INST_PUSH(CPU& cpu, uint8_t op_code) {
+
+    switch (op_code) {
+    case Instruction:
+    LPHA : { cpu.mem_write(cpu.SP++, cpu.AC); } break;
+    case Instruction::PHP: {
+        cpu.mem_write(cpu.SP++, cpu.SR.Value());
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
+void INST_PULL(CPU& cpu, uint8_t op_code) {
+
+    switch (op_code) {
+    case Instruction::PLA: {
+        cpu.AC = cpu.mem_read(cpu.SP--);
+    } break;
+    case Instruction::PLP: {
+        uint8_t val = cpu.mem_read(cpu.SP--);
+        cpu.SR.N = GET_BIT(val, 7);
+        cpu.SR.V = GET_BIT(val, 6);
+        cpu.SR.B = GET_BIT(val, 4);
+        cpu.SR.D = GET_BIT(val, 3);
+        cpu.SR.I = GET_BIT(val, 2);
+        cpu.SR.Z = GET_BIT(val, 1);
+        cpu.SR.C = GET_BIT(val, 0);
+    } break;
+    default:
+        ISTRUCTION_UNREACHABLE(op_code);
+    }
+}
+
 void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
     inst_map[Instruction::ADC_IMM] = inst_map[Instruction::ADC_ZP] =
         inst_map[Instruction::ADC_ZPX] = inst_map[Instruction::ADC_ABS] =
@@ -736,6 +770,9 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
             inst_map[Instruction::ORA_ABSX] = inst_map[Instruction::ORA_ABSY] =
                 inst_map[Instruction::ORA_INDX] =
                     inst_map[Instruction::ORA_INDY] = INST_ORA;
+
+    inst_map[Instruction::PHA] = inst_map[Instruction::PHP] = INST_PUSH;
+    inst_map[Instruction::PLA] = inst_map[Instruction::PLP] = INST_PULL;
 }
 
 std::string ToString(Instruction inst) {
@@ -863,6 +900,12 @@ std::string ToString(Instruction inst) {
         INSERT_INST(Instruction::ORA_ABSY);
         INSERT_INST(Instruction::ORA_INDX);
         INSERT_INST(Instruction::ORA_INDY);
+
+        INSERT_INST(Instruction::PHA);
+        INSERT_INST(Instruction::PHP);
+
+        INSERT_INST(Instruction::PLA);
+        INSERT_INST(Instruction::PLP);
 
         INSERT_INST(Instruction::NOP);
     }

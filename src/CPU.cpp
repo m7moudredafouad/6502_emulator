@@ -20,7 +20,7 @@ void CPU::dump() {
     cout << ", X: 0x" << int(X);
     cout << ", Y: 0x" << int(Y);
     cout << ", SP: 0x" << int(SP);
-    cout << ", SR(NV_BDIZC): 0b" << int(SR.N) << int(SR.V) << 0 << int(SR.B)
+    cout << ", SR(NV_BDIZC): 0b" << int(SR.N) << int(SR.V) << 1 << int(SR.B)
          << int(SR.D) << int(SR.I) << int(SR.Z) << int(SR.C);
     cout << dec;
     cout << endl;

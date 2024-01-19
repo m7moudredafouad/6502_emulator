@@ -173,16 +173,16 @@ enum Instruction : uint8_t {
     ORA_INDY = 0x11,
 
     // PHA Push Accumulator on Stack
-    // PHA = 0x48,
+    PHA = 0x48,
 
     // PHP Push Processor Status on Stack
-    // PHP = 0x08,
+    PHP = 0x08,
 
     // PLA Pull Accumulator from Stack
-    // PLA = 0x68,
+    PLA = 0x68,
 
     // PLP Pull Processor Status from Stack
-    // PLP = 0x28,
+    PLP = 0x28,
 
     // ROL Rotate One Bit Left (Memory or Accumulator)
     // ROL_ACC = 0x6A,
