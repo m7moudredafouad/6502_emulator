@@ -50,6 +50,6 @@ uint16_t IndirectIndexedAddress(CPU& cpu, bool force_cycle) {
     uint16_t address = cpu.Fetch();
     uint8_t low = cpu.mem_read(address++);
     uint8_t high = cpu.mem_read(address);
-    address = address_from_bytes(low, high);
+    address = address_from_bytes(low, high) + cpu.SR.C;
     return cpu.get_address(address_from_bytes(low, high), cpu.Y, force_cycle);
 }

@@ -755,9 +755,8 @@ void INST_ROL(CPU& cpu, uint8_t op_code) {
         cpu.AC = val & 0xFF | cpu.SR.C;
     } else {
         val = cpu.mem_read(address);
+        cpu.mem_write(address, (val << 1) & 0xFF | cpu.SR.C);
         cpu.SR.C = GET_BIT(val, 7);
-        val <<= 1;
-        cpu.mem_write(address, val & 0xFF | cpu.SR.C);
     }
 
     cpu.SR.N = SIGN_BIT(val);
@@ -796,9 +795,8 @@ void INST_ROR(CPU& cpu, uint8_t op_code) {
         cpu.AC = val & 0xFF | (cpu.SR.C << 7);
     } else {
         val = cpu.mem_read(address);
+        cpu.mem_write(address, (val >> 1) & 0xFF | (cpu.SR.C << 7));
         cpu.SR.C = GET_BIT(val, 0);
-        val >>= 1;
-        cpu.mem_write(address, val & 0xFF | (cpu.SR.C << 7));
     }
 
     cpu.SR.N = SIGN_BIT(val);
@@ -1117,192 +1115,192 @@ void initialize_map(std::unordered_map<uint8_t, inst_func_t>& inst_map) {
 
 std::string ToString(Instruction inst) {
 #define INSERT_INST(v)                                                         \
-    case v:                                                                    \
+    case Instruction::v:                                                                    \
         return #v
     switch (inst) {
-        INSERT_INST(Instruction::ADC_IMM);
-        INSERT_INST(Instruction::ADC_ZP);
-        INSERT_INST(Instruction::ADC_ZPX);
-        INSERT_INST(Instruction::ADC_ABS);
-        INSERT_INST(Instruction::ADC_ABSX);
-        INSERT_INST(Instruction::ADC_ABSY);
-        INSERT_INST(Instruction::ADC_INDX);
-        INSERT_INST(Instruction::ADC_INDY);
+        INSERT_INST(ADC_IMM);
+        INSERT_INST(ADC_ZP);
+        INSERT_INST(ADC_ZPX);
+        INSERT_INST(ADC_ABS);
+        INSERT_INST(ADC_ABSX);
+        INSERT_INST(ADC_ABSY);
+        INSERT_INST(ADC_INDX);
+        INSERT_INST(ADC_INDY);
 
-        INSERT_INST(Instruction::AND_IMM);
-        INSERT_INST(Instruction::AND_ZP);
-        INSERT_INST(Instruction::AND_ZPX);
-        INSERT_INST(Instruction::AND_ABS);
-        INSERT_INST(Instruction::AND_ABSX);
-        INSERT_INST(Instruction::AND_ABSY);
-        INSERT_INST(Instruction::AND_INDX);
-        INSERT_INST(Instruction::AND_INDY);
+        INSERT_INST(AND_IMM);
+        INSERT_INST(AND_ZP);
+        INSERT_INST(AND_ZPX);
+        INSERT_INST(AND_ABS);
+        INSERT_INST(AND_ABSX);
+        INSERT_INST(AND_ABSY);
+        INSERT_INST(AND_INDX);
+        INSERT_INST(AND_INDY);
 
-        INSERT_INST(Instruction::ASL_ACC);
-        INSERT_INST(Instruction::ASL_ZP);
-        INSERT_INST(Instruction::ASL_ZPX);
-        INSERT_INST(Instruction::ASL_ABS);
-        INSERT_INST(Instruction::ASL_ABSX);
+        INSERT_INST(ASL_ACC);
+        INSERT_INST(ASL_ZP);
+        INSERT_INST(ASL_ZPX);
+        INSERT_INST(ASL_ABS);
+        INSERT_INST(ASL_ABSX);
 
-        INSERT_INST(Instruction::BCC);
-        INSERT_INST(Instruction::BCS);
-        INSERT_INST(Instruction::BEQ);
-        INSERT_INST(Instruction::BIT_ZP);
-        INSERT_INST(Instruction::BIT_ABS);
-        INSERT_INST(Instruction::BMI);
-        INSERT_INST(Instruction::BNE);
-        INSERT_INST(Instruction::BPL);
-        INSERT_INST(Instruction::BVC);
-        INSERT_INST(Instruction::BVS);
+        INSERT_INST(BCC);
+        INSERT_INST(BCS);
+        INSERT_INST(BEQ);
+        INSERT_INST(BIT_ZP);
+        INSERT_INST(BIT_ABS);
+        INSERT_INST(BMI);
+        INSERT_INST(BNE);
+        INSERT_INST(BPL);
+        INSERT_INST(BVC);
+        INSERT_INST(BVS);
 
-        INSERT_INST(Instruction::BRK);
+        INSERT_INST(BRK);
 
-        INSERT_INST(Instruction::CLC);
-        INSERT_INST(Instruction::CLD);
-        INSERT_INST(Instruction::CLI);
-        INSERT_INST(Instruction::CLV);
+        INSERT_INST(CLC);
+        INSERT_INST(CLD);
+        INSERT_INST(CLI);
+        INSERT_INST(CLV);
 
-        INSERT_INST(Instruction::CMP_IMM);
-        INSERT_INST(Instruction::CMP_ZP);
-        INSERT_INST(Instruction::CMP_ZPX);
-        INSERT_INST(Instruction::CMP_ABS);
-        INSERT_INST(Instruction::CMP_ABSX);
-        INSERT_INST(Instruction::CMP_ABSY);
-        INSERT_INST(Instruction::CMP_INDX);
-        INSERT_INST(Instruction::CMP_INDY);
+        INSERT_INST(CMP_IMM);
+        INSERT_INST(CMP_ZP);
+        INSERT_INST(CMP_ZPX);
+        INSERT_INST(CMP_ABS);
+        INSERT_INST(CMP_ABSX);
+        INSERT_INST(CMP_ABSY);
+        INSERT_INST(CMP_INDX);
+        INSERT_INST(CMP_INDY);
 
-        INSERT_INST(Instruction::CMX_IMM);
-        INSERT_INST(Instruction::CMX_ZP);
-        INSERT_INST(Instruction::CMX_ABS);
+        INSERT_INST(CMX_IMM);
+        INSERT_INST(CMX_ZP);
+        INSERT_INST(CMX_ABS);
 
-        INSERT_INST(Instruction::CMY_IMM);
-        INSERT_INST(Instruction::CMY_ZP);
-        INSERT_INST(Instruction::CMY_ABS);
+        INSERT_INST(CMY_IMM);
+        INSERT_INST(CMY_ZP);
+        INSERT_INST(CMY_ABS);
 
-        INSERT_INST(Instruction::DEC_ZP);
-        INSERT_INST(Instruction::DEC_ZPX);
-        INSERT_INST(Instruction::DEC_ABS);
-        INSERT_INST(Instruction::DEC_ABSX);
+        INSERT_INST(DEC_ZP);
+        INSERT_INST(DEC_ZPX);
+        INSERT_INST(DEC_ABS);
+        INSERT_INST(DEC_ABSX);
 
-        INSERT_INST(Instruction::DEX);
-        INSERT_INST(Instruction::DEY);
+        INSERT_INST(DEX);
+        INSERT_INST(DEY);
 
-        INSERT_INST(Instruction::EOR_IMM);
-        INSERT_INST(Instruction::EOR_ZP);
-        INSERT_INST(Instruction::EOR_ZPX);
-        INSERT_INST(Instruction::EOR_ABS);
-        INSERT_INST(Instruction::EOR_ABSX);
-        INSERT_INST(Instruction::EOR_ABSY);
-        INSERT_INST(Instruction::EOR_INDX);
-        INSERT_INST(Instruction::EOR_INDY);
+        INSERT_INST(EOR_IMM);
+        INSERT_INST(EOR_ZP);
+        INSERT_INST(EOR_ZPX);
+        INSERT_INST(EOR_ABS);
+        INSERT_INST(EOR_ABSX);
+        INSERT_INST(EOR_ABSY);
+        INSERT_INST(EOR_INDX);
+        INSERT_INST(EOR_INDY);
 
-        INSERT_INST(Instruction::INC_ZP);
-        INSERT_INST(Instruction::INC_ZPX);
-        INSERT_INST(Instruction::INC_ABS);
-        INSERT_INST(Instruction::INC_ABSX);
+        INSERT_INST(INC_ZP);
+        INSERT_INST(INC_ZPX);
+        INSERT_INST(INC_ABS);
+        INSERT_INST(INC_ABSX);
 
-        INSERT_INST(Instruction::INX);
-        INSERT_INST(Instruction::INY);
+        INSERT_INST(INX);
+        INSERT_INST(INY);
 
-        INSERT_INST(Instruction::JMP_ABS);
-        INSERT_INST(Instruction::JMP_IND);
+        INSERT_INST(JMP_ABS);
+        INSERT_INST(JMP_IND);
 
-        INSERT_INST(Instruction::JSR);
+        INSERT_INST(JSR);
 
-        INSERT_INST(Instruction::LDA_IMM);
-        INSERT_INST(Instruction::LDA_ZP);
-        INSERT_INST(Instruction::LDA_ZPX);
-        INSERT_INST(Instruction::LDA_ABS);
-        INSERT_INST(Instruction::LDA_ABSX);
-        INSERT_INST(Instruction::LDA_ABSY);
-        INSERT_INST(Instruction::LDA_INDX);
-        INSERT_INST(Instruction::LDA_INDY);
+        INSERT_INST(LDA_IMM);
+        INSERT_INST(LDA_ZP);
+        INSERT_INST(LDA_ZPX);
+        INSERT_INST(LDA_ABS);
+        INSERT_INST(LDA_ABSX);
+        INSERT_INST(LDA_ABSY);
+        INSERT_INST(LDA_INDX);
+        INSERT_INST(LDA_INDY);
 
-        INSERT_INST(Instruction::LDX_IMM);
-        INSERT_INST(Instruction::LDX_ZP);
-        INSERT_INST(Instruction::LDX_ZPY);
-        INSERT_INST(Instruction::LDX_ABS);
-        INSERT_INST(Instruction::LDX_ABSY);
+        INSERT_INST(LDX_IMM);
+        INSERT_INST(LDX_ZP);
+        INSERT_INST(LDX_ZPY);
+        INSERT_INST(LDX_ABS);
+        INSERT_INST(LDX_ABSY);
 
-        INSERT_INST(Instruction::LDY_IMM);
-        INSERT_INST(Instruction::LDY_ZP);
-        INSERT_INST(Instruction::LDY_ZPX);
-        INSERT_INST(Instruction::LDY_ABS);
-        INSERT_INST(Instruction::LDY_ABSX);
+        INSERT_INST(LDY_IMM);
+        INSERT_INST(LDY_ZP);
+        INSERT_INST(LDY_ZPX);
+        INSERT_INST(LDY_ABS);
+        INSERT_INST(LDY_ABSX);
 
-        INSERT_INST(Instruction::LSR_ACC);
-        INSERT_INST(Instruction::LSR_ZP);
-        INSERT_INST(Instruction::LSR_ZPX);
-        INSERT_INST(Instruction::LSR_ABS);
-        INSERT_INST(Instruction::LSR_ABSX);
+        INSERT_INST(LSR_ACC);
+        INSERT_INST(LSR_ZP);
+        INSERT_INST(LSR_ZPX);
+        INSERT_INST(LSR_ABS);
+        INSERT_INST(LSR_ABSX);
 
-        INSERT_INST(Instruction::ORA_IMM);
-        INSERT_INST(Instruction::ORA_ZP);
-        INSERT_INST(Instruction::ORA_ZPX);
-        INSERT_INST(Instruction::ORA_ABS);
-        INSERT_INST(Instruction::ORA_ABSX);
-        INSERT_INST(Instruction::ORA_ABSY);
-        INSERT_INST(Instruction::ORA_INDX);
-        INSERT_INST(Instruction::ORA_INDY);
+        INSERT_INST(ORA_IMM);
+        INSERT_INST(ORA_ZP);
+        INSERT_INST(ORA_ZPX);
+        INSERT_INST(ORA_ABS);
+        INSERT_INST(ORA_ABSX);
+        INSERT_INST(ORA_ABSY);
+        INSERT_INST(ORA_INDX);
+        INSERT_INST(ORA_INDY);
 
-        INSERT_INST(Instruction::PHA);
-        INSERT_INST(Instruction::PHP);
+        INSERT_INST(PHA);
+        INSERT_INST(PHP);
 
-        INSERT_INST(Instruction::PLA);
-        INSERT_INST(Instruction::PLP);
+        INSERT_INST(PLA);
+        INSERT_INST(PLP);
 
-        INSERT_INST(Instruction::NOP);
+        INSERT_INST(NOP);
 
-        INSERT_INST(Instruction::ROL_ACC);
-        INSERT_INST(Instruction::ROL_ZP);
-        INSERT_INST(Instruction::ROL_ZPX);
-        INSERT_INST(Instruction::ROL_ABS);
-        INSERT_INST(Instruction::ROL_ABSX);
+        INSERT_INST(ROL_ACC);
+        INSERT_INST(ROL_ZP);
+        INSERT_INST(ROL_ZPX);
+        INSERT_INST(ROL_ABS);
+        INSERT_INST(ROL_ABSX);
 
-        INSERT_INST(Instruction::ROR_ACC);
-        INSERT_INST(Instruction::ROR_ZP);
-        INSERT_INST(Instruction::ROR_ZPX);
-        INSERT_INST(Instruction::ROR_ABS);
-        INSERT_INST(Instruction::ROR_ABSX);
+        INSERT_INST(ROR_ACC);
+        INSERT_INST(ROR_ZP);
+        INSERT_INST(ROR_ZPX);
+        INSERT_INST(ROR_ABS);
+        INSERT_INST(ROR_ABSX);
 
-        INSERT_INST(Instruction::RTI);
-        INSERT_INST(Instruction::RTS);
+        INSERT_INST(RTI);
+        INSERT_INST(RTS);
 
-        INSERT_INST(Instruction::SBC_IMM);
-        INSERT_INST(Instruction::SBC_ZP);
-        INSERT_INST(Instruction::SBC_ZPX);
-        INSERT_INST(Instruction::SBC_ABS);
-        INSERT_INST(Instruction::SBC_ABSX);
-        INSERT_INST(Instruction::SBC_ABSY);
-        INSERT_INST(Instruction::SBC_INDX);
-        INSERT_INST(Instruction::SBC_INDY);
+        INSERT_INST(SBC_IMM);
+        INSERT_INST(SBC_ZP);
+        INSERT_INST(SBC_ZPX);
+        INSERT_INST(SBC_ABS);
+        INSERT_INST(SBC_ABSX);
+        INSERT_INST(SBC_ABSY);
+        INSERT_INST(SBC_INDX);
+        INSERT_INST(SBC_INDY);
 
-        INSERT_INST(Instruction::SEC);
-        INSERT_INST(Instruction::SED);
-        INSERT_INST(Instruction::SEI);
+        INSERT_INST(SEC);
+        INSERT_INST(SED);
+        INSERT_INST(SEI);
 
-        INSERT_INST(Instruction::STA_ZP);
-        INSERT_INST(Instruction::STA_ZPX);
-        INSERT_INST(Instruction::STA_ABS);
-        INSERT_INST(Instruction::STA_ABSX);
-        INSERT_INST(Instruction::STA_ABSY);
-        INSERT_INST(Instruction::STA_INDX);
-        INSERT_INST(Instruction::STA_INDY);
+        INSERT_INST(STA_ZP);
+        INSERT_INST(STA_ZPX);
+        INSERT_INST(STA_ABS);
+        INSERT_INST(STA_ABSX);
+        INSERT_INST(STA_ABSY);
+        INSERT_INST(STA_INDX);
+        INSERT_INST(STA_INDY);
 
-        INSERT_INST(Instruction::STX_ZP);
-        INSERT_INST(Instruction::STX_ZPY);
-        INSERT_INST(Instruction::STX_ABS);
+        INSERT_INST(STX_ZP);
+        INSERT_INST(STX_ZPY);
+        INSERT_INST(STX_ABS);
 
-        INSERT_INST(Instruction::STY_ZP);
-        INSERT_INST(Instruction::STY_ZPX);
-        INSERT_INST(Instruction::STY_ABS);
+        INSERT_INST(STY_ZP);
+        INSERT_INST(STY_ZPX);
+        INSERT_INST(STY_ABS);
 
-        INSERT_INST(Instruction::TAX);
-        INSERT_INST(Instruction::TAY);
-        INSERT_INST(Instruction::TSX);
-        INSERT_INST(Instruction::TXA);
-        INSERT_INST(Instruction::TXS);
-        INSERT_INST(Instruction::TYA);
+        INSERT_INST(TAX);
+        INSERT_INST(TAY);
+        INSERT_INST(TSX);
+        INSERT_INST(TXA);
+        INSERT_INST(TXS);
+        INSERT_INST(TYA);
     }
 #undef INSERT_INST
 

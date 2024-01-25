@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input),
                                       {});
 
-    std::cout << std::hex;
+    std::cout << std::hex << std::uppercase;
     int i = 0;
     for (auto b : buffer) {
         i++;
@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
         if (i % 16 == 0)
             std::cout << "\n";
     }
-    std::cout << "\n" << std::dec;
+    std::cout << "\n" << std::nouppercase << std::dec;
 
-    CPU cpu(&buffer[0], buffer.size()); //, 0xFFFF - buffer.size());
+    CPU cpu(&buffer[0], buffer.size());
     cpu.Execute();
     return 0;
 }
