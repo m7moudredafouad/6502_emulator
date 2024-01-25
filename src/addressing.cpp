@@ -38,18 +38,18 @@ uint16_t IndirectAddress(CPU& cpu) {
     return address_from_bytes(low, high);
 }
 
-uint16_t IndexedIndirectAddress(CPU& cpu) {
-    uint16_t address = cpu.get_address(cpu.Fetch(), cpu.X);
+uint16_t IndexedIndirectAddress(CPU& cpu, bool force_cycle) {
+    uint16_t address = cpu.get_address(cpu.Fetch(), cpu.X, force_cycle);
     uint8_t low = cpu.mem_read(address++);
     uint8_t high = cpu.mem_read(address);
 
     return address_from_bytes(low, high);
 }
 
-uint16_t IndirectIndexedAddress(CPU& cpu) {
+uint16_t IndirectIndexedAddress(CPU& cpu, bool force_cycle) {
     uint16_t address = cpu.Fetch();
     uint8_t low = cpu.mem_read(address++);
     uint8_t high = cpu.mem_read(address);
     address = address_from_bytes(low, high);
-    return cpu.get_address(address_from_bytes(low, high), cpu.Y);
+    return cpu.get_address(address_from_bytes(low, high), cpu.Y, force_cycle);
 }

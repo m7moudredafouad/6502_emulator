@@ -165,7 +165,11 @@ void INST_BRANCH(CPU& cpu, uint8_t op_code) {
 
     if (condition) {
         ADD_CYCLE(cpu);
-        cpu.PC = cpu.get_address(cpu.PC, offset);
+        auto old_pc = cpu.PC;
+        cpu.PC += int8_t(offset);
+        if ((cpu.PC >> 8) != (old_pc >> 8)) {
+            ADD_CYCLE(cpu);
+        }
     }
 }
 
@@ -276,7 +280,7 @@ void INST_CMP(CPU& cpu, uint8_t op_code) {
 
     cpu.SR.N = SIGN_BIT(result);
     cpu.SR.Z = (result == 0);
-    cpu.SR.C = (value >= cpu.AC);
+    cpu.SR.C = (cpu.AC >= value);
 }
 
 void INST_CMX(CPU& cpu, uint8_t op_code) {
@@ -369,7 +373,7 @@ void INST_DEX(CPU& cpu, uint8_t op_code) {
 
     ADD_CYCLE(cpu);
     cpu.SR.N = SIGN_BIT(cpu.X);
-    cpu.SR.Z = (cpu.X);
+    cpu.SR.Z = (cpu.X == 0);
 }
 
 void INST_DEY(CPU& cpu, uint8_t op_code) {
@@ -478,7 +482,7 @@ void INST_INY(CPU& cpu, uint8_t op_code) {
 
     ADD_CYCLE(cpu);
     cpu.SR.N = SIGN_BIT(cpu.Y);
-    cpu.SR.Z = (cpu.Y);
+    cpu.SR.Z = (cpu.Y == 0);
 }
 
 void INST_JMP(CPU& cpu, uint8_t op_code) {
@@ -690,7 +694,6 @@ void INST_ORA(CPU& cpu, uint8_t op_code) {
 }
 
 void INST_PUSH(CPU& cpu, uint8_t op_code) {
-
     switch (op_code) {
     case Instruction::PHA: {
         cpu.PUSH(cpu.AC);
@@ -701,6 +704,7 @@ void INST_PUSH(CPU& cpu, uint8_t op_code) {
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
+    ADD_CYCLE(cpu);
 }
 
 void INST_PULL(CPU& cpu, uint8_t op_code) {
@@ -715,6 +719,8 @@ void INST_PULL(CPU& cpu, uint8_t op_code) {
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
+    ADD_CYCLE(cpu);
+    ADD_CYCLE(cpu);
 }
 
 void INST_ROL(CPU& cpu, uint8_t op_code) {
@@ -889,16 +895,16 @@ void INST_STA(CPU& cpu, uint8_t op_code) {
         address = AbsoluteAddress(cpu);
     } break;
     case Instruction::STA_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = AbsoluteXAddress(cpu, true);
     } break;
     case Instruction::STA_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = AbsoluteYAddress(cpu, true);
     } break;
     case Instruction::STA_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = IndexedIndirectAddress(cpu, true);
     } break;
     case Instruction::STA_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = IndirectIndexedAddress(cpu, true);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);

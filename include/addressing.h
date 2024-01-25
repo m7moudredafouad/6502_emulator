@@ -9,5 +9,5 @@ uint16_t AbsoluteAddress(CPU& cpu);
 uint16_t AbsoluteXAddress(CPU& cpu, bool force_cycle = false);
 uint16_t AbsoluteYAddress(CPU& cpu, bool force_cycle = false);
 uint16_t IndirectAddress(CPU& cpu);
-uint16_t IndexedIndirectAddress(CPU& cpu);
-uint16_t IndirectIndexedAddress(CPU& cpu);
+uint16_t IndexedIndirectAddress(CPU& cpu, bool force_cycle = false);
+uint16_t IndirectIndexedAddress(CPU& cpu, bool force_cycle = false);

@@ -45,7 +45,7 @@ class CPU {
     uint16_t SP; // stack pointer (8 bit)
 
   public:
-    CPU(uint8_t* program, uint16_t size);
+    CPU(uint8_t* program, uint16_t size, uint16_t start_address = 0);
 
     uint8_t mem_read(uint16_t address) {
         m_cycles++;
