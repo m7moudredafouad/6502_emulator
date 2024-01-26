@@ -44,7 +44,7 @@ class CPU {
         }
     } SR; // status register[NV - BDIZC](8 bit)
 
-    uint16_t SP; // stack pointer (8 bit)
+    uint8_t SP; // stack pointer (8 bit)
 
   public:
     CPU(uint8_t* program, uint16_t size);
@@ -72,12 +72,12 @@ class CPU {
      * @brief Pushing bytes to the stack causes the stack pointer to be
      * decremented.
      * */
-    void PUSH(uint8_t val) { write(SP--, val); }
+    void PUSH(uint8_t val) { write(0x100 + (SP--), val); }
 
     /**
      * @brief Pulling bytes from stack causes it to be incremented.
      * */
-    uint8_t POP() { return read(++SP); }
+    uint8_t POP() { return read(0x100 + (++SP)); }
 
     /**
      * @brief Fetch the next byte.

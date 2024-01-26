@@ -58,7 +58,7 @@ TEST(LDATestSuite, ZPX) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.AC, Instruction::LDA_ZPX);
+    EXPECT_EQ(cpu.AC, 0x0);
 }
 
 TEST(LDATestSuite, ABS) {

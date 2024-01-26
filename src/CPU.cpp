@@ -6,7 +6,7 @@
 
 /* CPU */
 CPU::CPU(uint8_t* program, uint16_t size)
-    : PC(0), AC(0), X(0), Y(0), SR({0, 0, 0, 0, 0, 0, 0, 0}), SP(0x01FF),
+    : PC(0), AC(0), X(0), Y(0), SR({0, 0, 0, 0, 0, 0, 0, 0}), SP(0xFF),
       m_program_size(size), m_cycles(0) {
     initialize_map(isa_map);
     uint16_t start_address = 0x8000;
@@ -25,13 +25,13 @@ void CPU::dump() {
            "Couldn't find op_code " << std::hex << int(op_code) << std::dec);
 
     cout << left << hex << uppercase;
-    cout << "0x" << setw(4) << int(PC) << ": 0x" << int(op_code);
+    cout << "0x" << setw(4) << int(PC) << ": 0x" << setw(2) << int(op_code);
     cout << " " << setw(9) << ToString(static_cast<Instruction>(op_code));
 
     cout << "[A: 0x" << setw(2) << int(AC);
     cout << ", X: 0x" << setw(2) << int(X);
     cout << ", Y: 0x" << setw(2) << int(Y);
-    cout << ", SP: 0x" << setw(3) << int(SP);
+    cout << ", SP: 0x" << setw(2) << int(SP);
     cout << ", SR(NV_BDIZC): 0b" << int(SR.N) << int(SR.V) << 1 << int(SR.B)
          << int(SR.D) << int(SR.I) << int(SR.Z) << int(SR.C) << "]";
     cout << nouppercase << dec << internal;

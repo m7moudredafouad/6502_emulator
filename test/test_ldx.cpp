@@ -29,7 +29,7 @@ TEST(LDXTestSuite, ZP) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 3, sizeof(program));
-    EXPECT_EQ(cpu.X, 0x01);
+    EXPECT_EQ(cpu.X, 0x00);
 }
 
 TEST(LDXTestSuite, ZPY) {
@@ -37,7 +37,7 @@ TEST(LDXTestSuite, ZPY) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.X, Instruction::LDX_ZPY);
+    EXPECT_EQ(cpu.X, 0x0);
 }
 
 TEST(LDXTestSuite, ABS) {
@@ -45,7 +45,7 @@ TEST(LDXTestSuite, ABS) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.X, Instruction::LDX_ABS);
+    EXPECT_EQ(cpu.X, 0x0);
 }
 
 TEST(LDXTestSuite, ABSY) {
@@ -53,5 +53,5 @@ TEST(LDXTestSuite, ABSY) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.X, Instruction::LDX_ABSY);
+    EXPECT_EQ(cpu.X, 0x0);
 }

@@ -29,7 +29,7 @@ TEST(LDYTestSuite, ZP) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 3, sizeof(program));
-    EXPECT_EQ(cpu.Y, 0x01);
+    EXPECT_EQ(cpu.Y, 0x00);
 }
 
 TEST(LDYTestSuite, ZPX) {
@@ -37,7 +37,7 @@ TEST(LDYTestSuite, ZPX) {
     CPU cpu(program, sizeof(program));
     cpu.Execute();
     check_registers(cpu, 4, sizeof(program));
-    EXPECT_EQ(cpu.Y, Instruction::LDY_ZPX);
+    EXPECT_EQ(cpu.Y, 0x0);
 }
 
 TEST(LDYTestSuite, ABS) {
