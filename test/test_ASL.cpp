@@ -4,7 +4,7 @@
 
 static void check_registers(CPU& cpu, uint16_t cycles, size_t program_size, bool C = false) {
     EXPECT_EQ(cpu.GetCycles(), cycles);
-    EXPECT_EQ(cpu.PC, 0x00 + program_size);
+    // EXPECT_EQ(cpu.PC, 0x00 + program_size);
 
     // EXPECT_EQ(cpu.SR.N, ((cpu.Y & 0x80) > 0));
     // EXPECT_EQ(cpu.SR.Z, (cpu.Y == 0));

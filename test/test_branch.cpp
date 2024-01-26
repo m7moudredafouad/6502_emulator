@@ -25,11 +25,11 @@ TEST(BranchTestSuite, BCCSamePage) {
 }
 
 TEST(BranchTestSuite, BCCOtherPage) {
-    uint8_t program[] = {Instruction::BCC, 0xFF};
+    uint8_t program[] = {Instruction::BCC, 0xF1};
     CPU cpu(program, sizeof(program));
     auto pc = cpu.PC;
     cpu.Execute();
-    check_registers(cpu, 4, pc + 0xFF + 0x2);
+    check_registers(cpu, 4, pc + int8_t(0xF1) + 0x2);
 }
 
 TEST(BranchTestSuite, BCSNoBranch) {
@@ -50,10 +50,10 @@ TEST(BranchTestSuite, BCSSamePage) {
 }
 
 TEST(BranchTestSuite, BCSOtherPage) {
-    uint8_t program[] = {Instruction::BCS, 0xFF};
+    uint8_t program[] = {Instruction::BCS, 0xF1};
     CPU cpu(program, sizeof(program));
     auto pc = cpu.PC;
     cpu.SR.C = 1;
     cpu.Execute();
-    check_registers(cpu, 4, pc + 0xFF + 0x2);
+    check_registers(cpu, 4, pc + int8_t(0xF1) + 0x2);
 }

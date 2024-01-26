@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/out/6502_emulator",
             "args": [
-                "./test_projects/test.bin"
+                "./test_projects/bubble.bin"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

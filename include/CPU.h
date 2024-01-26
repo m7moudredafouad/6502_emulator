@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <utils.h>
 
+#define ADD_CYCLE(cpu) cpu.read(0)
+
 class CPU;
 
 using inst_func_t = void (*)(CPU&, uint8_t);
@@ -47,55 +49,41 @@ class CPU {
   public:
     CPU(uint8_t* program, uint16_t size);
 
-    uint8_t mem_read(uint16_t address) {
+    /**
+     * @brief CPU gives a signal to read from the bus
+     * */
+    uint8_t read(uint16_t address) {
         m_cycles++;
         return m_memory.read(address);
     }
 
-    void mem_write(uint16_t address, uint8_t data) {
+    /**
+     * @brief CPU gives a signal to write to the bus
+     * */
+    void write(uint16_t address, uint8_t data) {
         m_cycles++;
         return m_memory.write(address, data);
-    }
-
-    template <typename address_t>
-    uint16_t get_address(address_t base_address, uint8_t offset,
-                         bool force_cycle = false) {
-        uint16_t address = base_address + offset;
-
-        // FIXME: Not sure why, but it's needed for ZPX
-        if constexpr (std::is_same_v<address_t, uint8_t>) {
-            m_cycles++;
-            address &= 0xFF;
-        } else if constexpr (std::is_same_v<address_t, uint16_t>) {
-            if (force_cycle || ((address >> 8) != (base_address >> 8))) {
-                m_cycles++;
-            }
-        } else {
-            ASSERT(0, "get_address address_t not compatible");
-        }
-
-        return address;
     }
 
   public:
     uint16_t GetCycles() { return m_cycles; }
 
-    uint8_t GetSR() {
-        uint8_t val = 0, tmp;
-        std::memcpy(&tmp, &SR, sizeof(tmp));
+    /**
+     * @brief Pushing bytes to the stack causes the stack pointer to be
+     * decremented.
+     * */
+    void PUSH(uint8_t val) { write(SP--, val); }
 
-        for (int i = 0; i < 8; i++) {
-            val = (val << 1);
-            val |= (tmp & 0x1);
-            tmp = (tmp >> 1);
-        }
-        return val;
-    }
+    /**
+     * @brief Pulling bytes from stack causes it to be incremented.
+     * */
+    uint8_t POP() { return read(++SP); }
 
-  public:
-    void PUSH(uint8_t);
-    uint8_t POP();
-    uint8_t Fetch();
+    /**
+     * @brief Fetch the next byte.
+     * */
+    uint8_t Fetch() { return read(PC++); }
+
     void Execute();
 
   private:

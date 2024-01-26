@@ -5,41 +5,39 @@
 #define ISTRUCTION_UNREACHABLE(op)                                             \
     ASSERT(0, "Unknown op_code: 0x" << std::hex << int(op) << std::dec)
 
-#define ADD_CYCLE(cpu) cpu.mem_read(0)
-
 void INST_ADC(CPU& cpu, uint8_t op_code) {
     uint16_t address;
 
     switch (op_code) {
     case Instruction::ADC_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::ADC_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::ADC_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::ADC_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::ADC_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::ADC_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::ADC_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::ADC_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    uint8_t operand = cpu.mem_read(address);
+    uint8_t operand = cpu.read(address);
     uint8_t ac = cpu.AC;
     uint16_t val = operand + cpu.AC + cpu.SR.C;
     cpu.AC = (val & 0xFF);
@@ -58,34 +56,34 @@ void INST_AND(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::AND_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::AND_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::AND_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::AND_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::AND_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::AND_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::AND_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::AND_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.AC &= cpu.mem_read(address);
+    cpu.AC &= cpu.read(address);
 
     cpu.SR.N = SIGN_BIT(cpu.AC);
     cpu.SR.Z = cpu.AC == 0;
@@ -98,16 +96,16 @@ void INST_ASL(CPU& cpu, uint8_t op_code) {
     case Instruction::ASL_ACC:
         break;
     case Instruction::ASL_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::ASL_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::ASL_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::ASL_ABSX: {
-        address = AbsoluteXAddress(cpu, true);
+        address = ADDR_ABSX(cpu, true);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -121,9 +119,9 @@ void INST_ASL(CPU& cpu, uint8_t op_code) {
         val <<= 1;
         cpu.AC = val & 0xFF;
     } else {
-        val = cpu.mem_read(address);
+        val = cpu.read(address);
         val <<= 1;
-        cpu.mem_write(address, val & 0xFF);
+        cpu.write(address, val & 0xFF);
     }
 
     cpu.SR.N = SIGN_BIT(val);
@@ -178,16 +176,16 @@ void INST_BIT(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::BIT_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::BIT_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    uint8_t operand = cpu.mem_read(address);
+    uint8_t operand = cpu.read(address);
     cpu.SR.Z = ((cpu.AC & operand) == 0);
     cpu.SR.N = GET_BIT(operand, 7);
     cpu.SR.V = GET_BIT(operand, 6);
@@ -232,7 +230,7 @@ void INST_BRK(CPU& cpu, uint8_t op_code) {
         cpu.PUSH(high);
         cpu.PUSH(cpu.SR.Value());
 
-        cpu.PC = address_from_bytes(cpu.mem_read(0xFFFE), cpu.mem_read(0xFFFF));
+        cpu.PC = address_from_bytes(cpu.read(0xFFFE), cpu.read(0xFFFF));
 
         cpu.SR.B = 1;
 
@@ -248,34 +246,34 @@ void INST_CMP(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::CMP_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::CMP_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::CMP_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::CMP_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::CMP_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::CMP_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::CMP_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::CMP_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    auto value = cpu.mem_read(address);
+    auto value = cpu.read(address);
     uint8_t result = cpu.AC - value;
 
     cpu.SR.N = SIGN_BIT(result);
@@ -288,19 +286,19 @@ void INST_CMX(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::CMX_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::CMX_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::CMX_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    auto value = cpu.mem_read(address);
+    auto value = cpu.read(address);
     uint8_t result = cpu.X - value;
 
     cpu.SR.N = SIGN_BIT(result);
@@ -313,19 +311,19 @@ void INST_CMY(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::CMY_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::CMY_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::CMY_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    auto value = cpu.mem_read(address);
+    auto value = cpu.read(address);
     uint8_t result = cpu.Y - value;
 
     cpu.SR.N = SIGN_BIT(result);
@@ -338,25 +336,25 @@ void INST_DEC(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::DEC_ZP: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::DEC_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::DEC_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::DEC_ABSX: {
-        address = AbsoluteXAddress(cpu, true);
+        address = ADDR_ABSX(cpu, true);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    uint8_t value = cpu.mem_read(address);
+    uint8_t value = cpu.read(address);
     value--;
     ADD_CYCLE(cpu);
-    cpu.mem_write(address, value);
+    cpu.write(address, value);
 
     cpu.SR.N = SIGN_BIT(value);
     cpu.SR.Z = (value == 0);
@@ -395,34 +393,34 @@ void INST_EOR(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::CMP_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::CMP_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::CMP_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::CMP_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::CMP_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::CMP_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::CMP_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::CMP_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    uint8_t result = cpu.AC ^ cpu.mem_read(address);
+    uint8_t result = cpu.AC ^ cpu.read(address);
 
     cpu.SR.N = SIGN_BIT(result);
     cpu.SR.Z = (result == 0);
@@ -433,25 +431,25 @@ void INST_INC(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::INC_ZP: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::INC_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::INC_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::INC_ABSX: {
-        address = AbsoluteXAddress(cpu, true);
+        address = ADDR_ABSX(cpu, true);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    uint8_t value = cpu.mem_read(address);
+    uint8_t value = cpu.read(address);
     value++;
     ADD_CYCLE(cpu);
-    cpu.mem_write(address, value);
+    cpu.write(address, value);
 
     cpu.SR.N = SIGN_BIT(value);
     cpu.SR.Z = (value == 0);
@@ -488,10 +486,10 @@ void INST_INY(CPU& cpu, uint8_t op_code) {
 void INST_JMP(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::JMP_ABS: {
-        cpu.PC = AbsoluteAddress(cpu);
+        cpu.PC = ADDR_ABS(cpu);
     } break;
     case Instruction::JMP_IND: {
-        cpu.PC = IndirectAddress(cpu);
+        cpu.PC = ADDR_IND(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -501,7 +499,7 @@ void INST_JMP(CPU& cpu, uint8_t op_code) {
 void INST_JSR(CPU& cpu, uint8_t op_code) {
     switch (op_code) {
     case Instruction::JSR: {
-        auto new_add = AbsoluteAddress(cpu);
+        auto new_add = ADDR_ABS(cpu);
         auto [low, high] = bytes_from_address(cpu.PC - 1);
         cpu.PUSH(low);
         cpu.PUSH(high);
@@ -517,34 +515,34 @@ void INST_LDA(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::LDA_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::LDA_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::LDA_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::LDA_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::LDA_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::LDA_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::LDA_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::LDA_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.AC = cpu.mem_read(address);
+    cpu.AC = cpu.read(address);
     cpu.SR.N = SIGN_BIT(cpu.AC);
     cpu.SR.Z = cpu.AC == 0;
 }
@@ -554,25 +552,25 @@ void INST_LDX(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::LDX_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::LDX_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::LDX_ZPY: {
-        address = ZeroPageYAddress(cpu);
+        address = ADDR_ZPY(cpu);
     } break;
     case Instruction::LDX_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::LDX_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.X = cpu.mem_read(address);
+    cpu.X = cpu.read(address);
     cpu.SR.N = SIGN_BIT(cpu.X);
     cpu.SR.Z = cpu.X == 0;
 }
@@ -582,25 +580,25 @@ void INST_LDY(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::LDY_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::LDY_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::LDY_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::LDY_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::LDY_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.Y = cpu.mem_read(address);
+    cpu.Y = cpu.read(address);
     cpu.SR.N = SIGN_BIT(cpu.Y);
     cpu.SR.Z = cpu.Y == 0;
 }
@@ -612,16 +610,16 @@ void INST_LSR(CPU& cpu, uint8_t op_code) {
     case Instruction::LSR_ACC:
         break;
     case Instruction::LSR_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::LSR_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::LSR_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::LSR_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -636,10 +634,10 @@ void INST_LSR(CPU& cpu, uint8_t op_code) {
         val >>= 1;
         cpu.AC = val & 0xFF;
     } else {
-        val = cpu.mem_read(address);
+        val = cpu.read(address);
         cpu.SR.C = GET_BIT(val, 0);
         val >>= 1;
-        cpu.mem_write(address, val & 0xFF);
+        cpu.write(address, val & 0xFF);
     }
 
     cpu.SR.N = 0;
@@ -661,34 +659,34 @@ void INST_ORA(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::ORA_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::ORA_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::ORA_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::ORA_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::ORA_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::ORA_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::ORA_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::ORA_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.AC = cpu.AC | cpu.mem_read(address);
+    cpu.AC = cpu.AC | cpu.read(address);
     cpu.SR.N = SIGN_BIT(cpu.AC);
     cpu.SR.Z = cpu.AC == 0;
 }
@@ -730,16 +728,16 @@ void INST_ROL(CPU& cpu, uint8_t op_code) {
     case Instruction::ROL_ACC:
         break;
     case Instruction::ROL_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::ROL_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::ROL_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::ROL_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -754,8 +752,8 @@ void INST_ROL(CPU& cpu, uint8_t op_code) {
         val <<= 1;
         cpu.AC = val & 0xFF | cpu.SR.C;
     } else {
-        val = cpu.mem_read(address);
-        cpu.mem_write(address, (val << 1) & 0xFF | cpu.SR.C);
+        val = cpu.read(address);
+        cpu.write(address, (val << 1) & 0xFF | cpu.SR.C);
         cpu.SR.C = GET_BIT(val, 7);
     }
 
@@ -770,16 +768,16 @@ void INST_ROR(CPU& cpu, uint8_t op_code) {
     case Instruction::ROR_ACC:
         break;
     case Instruction::ROR_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::ROR_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::ROR_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::ROR_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
@@ -794,8 +792,8 @@ void INST_ROR(CPU& cpu, uint8_t op_code) {
         val >>= 1;
         cpu.AC = val & 0xFF | (cpu.SR.C << 7);
     } else {
-        val = cpu.mem_read(address);
-        cpu.mem_write(address, (val >> 1) & 0xFF | (cpu.SR.C << 7));
+        val = cpu.read(address);
+        cpu.write(address, (val >> 1) & 0xFF | (cpu.SR.C << 7));
         cpu.SR.C = GET_BIT(val, 0);
     }
 
@@ -835,34 +833,34 @@ void INST_SBC(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::SBC_IMM: {
-        address = ImmediateAddress(cpu);
+        address = ADDR_IMM(cpu);
     } break;
     case Instruction::SBC_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::SBC_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::SBC_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::SBC_ABSX: {
-        address = AbsoluteXAddress(cpu);
+        address = ADDR_ABSX(cpu);
     } break;
     case Instruction::SBC_ABSY: {
-        address = AbsoluteYAddress(cpu);
+        address = ADDR_ABSY(cpu);
     } break;
     case Instruction::SBC_INDX: {
-        address = IndexedIndirectAddress(cpu);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::SBC_INDY: {
-        address = IndirectIndexedAddress(cpu);
+        address = ADDR_INDY(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    uint8_t operand = cpu.mem_read(address);
+    uint8_t operand = cpu.read(address);
     uint8_t ac = cpu.AC;
     uint16_t val = cpu.AC - operand - (1 - cpu.SR.C);
     cpu.AC = (val & 0xFF);
@@ -884,31 +882,31 @@ void INST_STA(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::STA_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::STA_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::STA_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     case Instruction::STA_ABSX: {
-        address = AbsoluteXAddress(cpu, true);
+        address = ADDR_ABSX(cpu, true);
     } break;
     case Instruction::STA_ABSY: {
-        address = AbsoluteYAddress(cpu, true);
+        address = ADDR_ABSY(cpu, true);
     } break;
     case Instruction::STA_INDX: {
-        address = IndexedIndirectAddress(cpu, true);
+        address = ADDR_INDX(cpu);
     } break;
     case Instruction::STA_INDY: {
-        address = IndirectIndexedAddress(cpu, true);
+        address = ADDR_INDY(cpu, true);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.mem_write(address, cpu.AC);
+    cpu.write(address, cpu.AC);
 }
 
 void INST_STX(CPU& cpu, uint8_t op_code) {
@@ -916,19 +914,19 @@ void INST_STX(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::STX_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::STX_ZPY: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::STX_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.mem_write(address, cpu.X);
+    cpu.write(address, cpu.X);
 }
 
 void INST_STY(CPU& cpu, uint8_t op_code) {
@@ -936,19 +934,19 @@ void INST_STY(CPU& cpu, uint8_t op_code) {
 
     switch (op_code) {
     case Instruction::STY_ZP: {
-        address = ZeroPageAddress(cpu);
+        address = ADDR_ZP(cpu);
     } break;
     case Instruction::STY_ZPX: {
-        address = ZeroPageXAddress(cpu);
+        address = ADDR_ZPX(cpu);
     } break;
     case Instruction::STY_ABS: {
-        address = AbsoluteAddress(cpu);
+        address = ADDR_ABS(cpu);
     } break;
     default:
         ISTRUCTION_UNREACHABLE(op_code);
     }
 
-    cpu.mem_write(address, cpu.Y);
+    cpu.write(address, cpu.Y);
 }
 
 void INST_TRANSFER(CPU& cpu, uint8_t op_code) {
@@ -964,14 +962,14 @@ void INST_TRANSFER(CPU& cpu, uint8_t op_code) {
         cpu.Y = cpu.AC;
     } break;
     case Instruction::TSX: {
-        cpu.X = cpu.mem_read(cpu.SP);
+        cpu.X = cpu.read(cpu.SP);
     } break;
     case Instruction::TXA: {
         cpu.AC = cpu.X;
         ADD_CYCLE(cpu);
     } break;
     case Instruction::TXS: {
-        cpu.mem_write(cpu.SP, cpu.X);
+        cpu.write(cpu.SP, cpu.X);
     } break;
     case Instruction::TYA: {
         cpu.AC = cpu.X;
